@@ -1,0 +1,179 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ============================================================
+# preprocess-article.sh
+# Preprocessing pipeline for content articles
+#
+# Calls Tavily (research) + Slashr (SEO brief) + fal.ai (image),
+# then assembles everything into /tmp/preprocess-{slug}/prompt-data.md
+#
+# Usage: ./scripts/preprocess-article.sh <slug> <keyword> <branch> <parent> <order>
+# Batch: ./scripts/preprocess-article.sh slug1 kw1 b1 p1 o1 & \
+#        ./scripts/preprocess-article.sh slug2 kw2 b2 p2 o2 & wait
+# ============================================================
+
+if [ $# -lt 5 ]; then
+    echo "Usage: $0 <slug> <keyword> <branch> <parent> <order>"
+    echo ""
+    echo "  slug     Article slug (ex: first-steps)"
+    echo "  keyword  Main SEO keyword (ex: \"getting started guide\")"
+    echo "  branch   Content branch (ex: getting-started)"
+    echo "  parent   Parent hub slug (ex: getting-started)"
+    echo "  order    Order in branch (ex: 1)"
+    exit 1
+fi
+
+SLUG="$1"
+KEYWORD="$2"
+BRANCH="$3"
+PARENT="$4"
+ORDER="$5"
+
+# --- Paths ---
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+SITE_DIR="$PROJECT_DIR/site"
+# TODO: Adjust image path for your content structure
+IMAGE_DIR="$SITE_DIR/public/images/guides"
+IMAGE_PATH="$IMAGE_DIR/$SLUG.webp"
+OUT="/tmp/preprocess-${SLUG}"
+
+# --- Dependencies ---
+for cmd in curl jq; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "[$SLUG] Error: '$cmd' required." >&2
+        exit 1
+    fi
+done
+
+# --- Environment ---
+if [ ! -f "$SITE_DIR/.env" ]; then
+    echo "[$SLUG] Error: $SITE_DIR/.env not found." >&2
+    exit 1
+fi
+source "$SITE_DIR/.env"
+
+# --- Setup ---
+mkdir -p "$OUT" "$IMAGE_DIR"
+
+echo "[$SLUG] Preprocessing..."
+
+# ============================================================
+# 1. TAVILY — Factual research
+# ============================================================
+echo "[$SLUG]   Tavily..."
+TAVILY_PAYLOAD=$(jq -n --arg q "$KEYWORD" --arg k "$TAVILY_API_KEY" \
+    '{api_key: $k, query: $q, search_depth: "advanced", max_results: 5, include_answer: true}')
+curl -s --max-time 30 -X POST "https://api.tavily.com/search" \
+    -H "Content-Type: application/json" \
+    -d "$TAVILY_PAYLOAD" \
+    -o "$OUT/tavily.json" 2>/dev/null || echo '{}' > "$OUT/tavily.json"
+echo "[$SLUG]   Tavily: $(jq -r '.results | length // 0' "$OUT/tavily.json" 2>/dev/null || echo 0) sources"
+
+# ============================================================
+# 2. SEO BRIEF (Slashr)
+# ============================================================
+echo "[$SLUG]   Brief Slashr..."
+BRIEF_PAYLOAD=$(jq -n --arg kw "$KEYWORD" \
+    '{keyword: $kw, location: "France", language: "fr"}')
+curl -s --max-time 60 -X POST "https://outils.agence-slashr.fr/brief-contenu/api/generate-brief" \
+    -H "Content-Type: application/json" \
+    -d "$BRIEF_PAYLOAD" \
+    -o "$OUT/brief.json" 2>/dev/null || echo '{}' > "$OUT/brief.json"
+BRIEF_WORDS=$(jq -r '.semanticData.recommended_words // 2500' "$OUT/brief.json" 2>/dev/null || echo 2500)
+BRIEF_WORDS=$(echo "$BRIEF_WORDS" | grep -oE '^[0-9]+$' || echo 2500)
+echo "[$SLUG]   Brief: $BRIEF_WORDS recommended words"
+
+# ============================================================
+# 3. IMAGE (fal.ai / Recraft V3)
+# ============================================================
+echo "[$SLUG]   Image fal.ai..."
+# TODO: Customize the image prompt template for your domain
+IMAGE_PROMPT="no text, no letters, no numbers, no words. Dark atmospheric digital illustration with grain texture. Scene depicting ${KEYWORD}. Dark void background with golden and violet accent lighting. Asymmetric composition, concrete visual metaphor, cinematic mood."
+FAL_PAYLOAD=$(jq -n --arg p "$IMAGE_PROMPT" \
+    '{prompt: $p, image_size: "landscape_16_9", style: "digital_illustration", substyle: "grain", colors: [{r:4,g:6,b:12},{r:245,g:158,b:11},{r:139,g:92,b:246}]}')
+IMAGE_URL=$(curl -s --max-time 60 -X POST "https://fal.run/fal-ai/recraft-20b" \
+    -H "Authorization: Key $FAL_KEY" \
+    -H "Content-Type: application/json" \
+    -d "$FAL_PAYLOAD" 2>/dev/null | jq -r '.images[0].url // empty' 2>/dev/null || true)
+IMAGE_OK="false"
+if [ -n "$IMAGE_URL" ]; then
+    curl -sL --max-time 30 "$IMAGE_URL" -o "$IMAGE_PATH" 2>/dev/null || true
+    if [ -s "$IMAGE_PATH" ]; then
+        IMAGE_OK="true"
+        echo "[$SLUG]   Image: OK"
+    else
+        echo "[$SLUG]   Image: download failed"
+    fi
+else
+    echo "[$SLUG]   Image: generation failed"
+fi
+
+# ============================================================
+# 4. PARENT HUB CONTENT
+# ============================================================
+# TODO: Adjust path for your content structure
+PARENT_HUB="$SITE_DIR/src/content/guides/$PARENT/index.md"
+if [ -f "$PARENT_HUB" ]; then
+    cp "$PARENT_HUB" "$OUT/parent.md"
+else
+    echo "" > "$OUT/parent.md"
+fi
+
+# ============================================================
+# 5. ASSEMBLE prompt-data.md
+# ============================================================
+BRIEF_H1=$(jq -r '.contentPlan.h1 // empty' "$OUT/brief.json" 2>/dev/null || true)
+BRIEF_META=$(jq -r '.seoMetadata.metaDescription // empty' "$OUT/brief.json" 2>/dev/null || true)
+TITLE_LINE="${BRIEF_H1:-SEO Title to write}"
+DESC_LINE="${BRIEF_META:-SEO Description ~155 characters}"
+IMAGE_FM=""
+[ "$IMAGE_OK" = "true" ] && IMAGE_FM="image: \"/images/guides/$SLUG.webp\""
+
+CONTENT_PATH="$SITE_DIR/src/content/guides/$PARENT/$SLUG.md"
+
+cat > "$OUT/prompt-data.md" <<DATAEOF
+# Preprocessed data for: $SLUG
+
+## Target file
+$CONTENT_PATH
+
+## Suggested frontmatter
+---
+title: "$TITLE_LINE"
+description: "$DESC_LINE"
+type: guide
+branch: $BRANCH
+parent: $PARENT
+order: $ORDER
+${IMAGE_FM}
+readingTime: "To calculate"
+---
+
+## SEO Brief
+
+Recommended word count: $BRIEF_WORDS
+
+### Required keywords
+$(jq -r '.semanticData.KW_obligatoires // "Not available"' "$OUT/brief.json" 2>/dev/null || echo "Not available")
+
+### Complementary keywords
+$(jq -r '.semanticData.KW_complementaires // "Not available"' "$OUT/brief.json" 2>/dev/null || echo "Not available")
+
+### Suggested content plan
+$(jq -r '.contentPlan.sections // "Not available"' "$OUT/brief.json" 2>/dev/null || echo "Not available")
+
+## Factual research (Tavily)
+
+### Synthesis
+$(jq -r '.answer // "No synthesis"' "$OUT/tavily.json" 2>/dev/null || echo "Not available")
+
+### Sources
+$(jq -r '.results[]? | "- \(.title) (\(.url))\n  \(.content[:500])\n"' "$OUT/tavily.json" 2>/dev/null || echo "No sources")
+
+## Parent hub content (do not repeat)
+$(cat "$OUT/parent.md")
+DATAEOF
+
+echo "[$SLUG] OK -> $OUT/prompt-data.md"

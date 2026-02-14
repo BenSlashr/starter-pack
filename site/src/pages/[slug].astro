@@ -1,0 +1,145 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+import CrossLinks from '@/components/CrossLinks.astro';
+import { getCollection, render } from 'astro:content';
+import type { LinkGroup } from '@/components/CrossLinks.astro';
+
+export async function getStaticPaths() {
+  const now = new Date();
+  const posts = await getCollection('blog', ({ data }) =>
+    data.pubDate.valueOf() <= now.valueOf()
+  );
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+// TODO: Customize cross-links for your content silos
+const crossLinkGroups: LinkGroup[] = [
+  {
+    title: 'Guides',
+    links: [
+      { href: '/guides/getting-started', label: 'Bien demarrer' },
+    ],
+  },
+  {
+    title: 'Glossaire',
+    links: [
+      { href: '/glossaire/seo', label: 'SEO' },
+      { href: '/glossaire', label: 'Tous les termes' },
+    ],
+  },
+];
+
+const formattedDate = new Date(post.data.pubDate).toLocaleDateString('fr-FR', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout
+  title={`${post.data.title} | MySite`}
+  description={post.data.description}
+  ogImage={post.data.image}
+>
+  <Navbar />
+
+  <main class="pt-32 pb-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
+        <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
+        <span>/</span>
+        <span class="text-text-secondary">{post.data.title}</span>
+      </nav>
+
+      <!-- Header -->
+      <header class="mb-10">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="px-2.5 py-0.5 text-xs font-semibold bg-secondary/10 text-secondary-light rounded-full border border-secondary/20">
+            {post.data.category}
+          </span>
+          {post.data.readingTime && (
+            <span class="text-xs text-text-muted">{post.data.readingTime} de lecture</span>
+          )}
+        </div>
+
+        <h1 class="font-display font-800 text-display leading-[1.1] mb-4 tracking-tight">
+          {post.data.title}
+        </h1>
+
+        <p class="text-body-lg text-text-secondary leading-relaxed mb-6">
+          {post.data.description}
+        </p>
+
+        <div class="flex items-center gap-4 text-sm text-text-muted border-t border-border pt-4">
+          <span>Par <strong class="text-text-secondary">{post.data.author}</strong></span>
+          <span>&middot;</span>
+          <time datetime={post.data.pubDate.toISOString()}>{formattedDate}</time>
+        </div>
+      </header>
+
+      <!-- Hero Image -->
+      {post.data.image && (
+        <div class="mb-10 rounded-card overflow-hidden border border-border">
+          <img
+            src={post.data.image}
+            alt={post.data.title}
+            class="w-full h-auto object-cover aspect-video"
+            loading="eager"
+          />
+        </div>
+      )}
+
+      <!-- Content -->
+      <article class="prose-custom">
+        <Content />
+      </article>
+
+      <!-- Cross-links -->
+      <section class="mt-12">
+        <CrossLinks groups={crossLinkGroups} />
+      </section>
+
+      <!-- Disclaimer -->
+      <div class="mt-8 p-4 rounded-card border border-border bg-surface-raised/20">
+        <p class="text-xs text-text-muted leading-relaxed">
+          <!-- TODO: Replace with your disclaimer -->
+          Cet article est publie a titre informatif. Faites vos propres recherches avant toute decision.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+
+  <!-- Schema.org Article -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": post.data.title,
+    "description": post.data.description,
+    "author": {
+      "@type": "Person",
+      "name": post.data.author,
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "MySite",
+      "url": Astro.site?.toString(),
+    },
+    "datePublished": post.data.pubDate.toISOString(),
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": new URL(`/${post.id}/`, Astro.site).toString(),
+    },
+  })} />
+</BaseLayout>

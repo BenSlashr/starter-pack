@@ -1,0 +1,41 @@
+---
+export interface LinkItem {
+  href: string;
+  label: string;
+}
+
+export interface LinkGroup {
+  title: string;
+  links: LinkItem[];
+}
+
+interface Props {
+  groups: LinkGroup[];
+  title?: string;
+}
+
+const { groups, title = 'Explorer aussi' } = Astro.props;
+---
+
+{groups.length > 0 && (
+  <div class="rounded-card border border-border bg-surface-raised/30 p-6">
+    <p class="text-xs uppercase tracking-wider text-text-muted mb-5">{title}</p>
+    <div class="space-y-4">
+      {groups.map((group) => (
+        <div>
+          <p class="text-sm font-medium text-text-secondary mb-2">{group.title}</p>
+          <div class="flex flex-wrap gap-2">
+            {group.links.map((link) => (
+              <a
+                href={link.href}
+                class="px-3 py-1.5 rounded-lg text-sm border border-border text-text-secondary hover:border-primary/50 hover:text-primary transition-all cursor-pointer"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}

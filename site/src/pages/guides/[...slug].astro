@@ -1,0 +1,190 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+import CrossLinks from '@/components/CrossLinks.astro';
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import type { LinkGroup } from '@/components/CrossLinks.astro';
+
+export async function getStaticPaths() {
+  const now = new Date();
+  const allPages = await getCollection('guides', ({ data }) =>
+    !data.pubDate || data.pubDate.valueOf() <= now.valueOf()
+  );
+  return allPages.map((entry) => {
+    let slug = entry.id;
+    if (slug === 'index') slug = '';
+    else if (slug.endsWith('/index')) slug = slug.slice(0, -'/index'.length);
+    return {
+      params: { slug: slug || undefined },
+      props: { entry, allPages },
+    };
+  });
+}
+
+interface Props {
+  entry: CollectionEntry<'guides'>;
+  allPages: CollectionEntry<'guides'>[];
+}
+
+const { entry, allPages } = Astro.props;
+const { Content, headings } = await render(entry);
+
+// Get sibling guides for navigation
+const siblings = allPages
+  .filter((p) => p.data.parent === entry.data.parent && p.data.type === 'guide')
+  .sort((a, b) => a.data.order - b.data.order);
+
+// Get children if this is a hub
+const children = allPages
+  .filter((p) => p.data.parent === entry.id.replace(/\/index$/, '') && p.data.type === 'guide')
+  .sort((a, b) => a.data.order - b.data.order);
+
+const isHub = entry.data.type === 'hub';
+
+// Build breadcrumb
+const parentHub = entry.data.parent
+  ? allPages.find((p) => p.id === `${entry.data.parent}/index` || p.id === entry.data.parent)
+  : null;
+
+const crossLinkGroups: LinkGroup[] = [
+  {
+    title: 'Glossaire',
+    links: [
+      { href: '/glossaire', label: 'Tous les termes' },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title={`${entry.data.title} | MySite`}
+  description={entry.data.description}
+  ogImage={entry.data.image}
+>
+  <Navbar />
+
+  <main class="pt-32 pb-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
+        <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
+        <span>/</span>
+        <a href="/guides" class="hover:text-primary transition-colors cursor-pointer">Guides</a>
+        {parentHub && (
+          <>
+            <span>/</span>
+            <a href={`/guides/${parentHub.id.replace(/\/index$/, '')}`} class="hover:text-primary transition-colors cursor-pointer">
+              {parentHub.data.title}
+            </a>
+          </>
+        )}
+        {!isHub && (
+          <>
+            <span>/</span>
+            <span class="text-text-secondary">{entry.data.title}</span>
+          </>
+        )}
+      </nav>
+
+      <!-- Header -->
+      <header class="mb-10">
+        {entry.data.readingTime && (
+          <span class="text-xs text-text-muted mb-4 block">{entry.data.readingTime} de lecture</span>
+        )}
+
+        <h1 class="font-display font-800 text-display leading-[1.1] mb-4 tracking-tight">
+          {entry.data.title}
+        </h1>
+
+        <p class="text-body-lg text-text-secondary leading-relaxed">
+          {entry.data.description}
+        </p>
+      </header>
+
+      <!-- Hero Image -->
+      {entry.data.image && (
+        <div class="mb-10 rounded-card overflow-hidden border border-border">
+          <img src={entry.data.image} alt={entry.data.title} class="w-full h-auto object-cover aspect-video" loading="eager" />
+        </div>
+      )}
+
+      <!-- Children guides (if hub) -->
+      {isHub && children.length > 0 && (
+        <div class="mb-10 p-6 rounded-card border border-border bg-surface-raised/30">
+          <h2 class="font-display font-600 text-body-lg text-text-primary mb-4">Articles de cette section</h2>
+          <div class="space-y-2">
+            {children.map((child, i) => (
+              <a
+                href={`/guides/${child.id}`}
+                class="flex items-center gap-3 px-4 py-3 rounded-lg border border-border hover:border-primary/30 transition-all cursor-pointer group"
+              >
+                <span class="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center flex-shrink-0">
+                  {i + 1}
+                </span>
+                <div>
+                  <p class="text-sm font-medium text-text-primary group-hover:text-primary transition-colors">{child.data.title}</p>
+                  <p class="text-xs text-text-muted">{child.data.readingTime}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Content -->
+      <article class="prose-custom">
+        <Content />
+      </article>
+
+      <!-- Sibling navigation -->
+      {!isHub && siblings.length > 1 && (
+        <nav class="mt-12 flex justify-between gap-4">
+          {(() => {
+            const idx = siblings.findIndex((s) => s.id === entry.id);
+            const prev = idx > 0 ? siblings[idx - 1] : null;
+            const next = idx < siblings.length - 1 ? siblings[idx + 1] : null;
+            return (
+              <>
+                {prev ? (
+                  <a href={`/guides/${prev.id}`} class="flex-1 p-4 rounded-card border border-border hover:border-primary/30 transition-all cursor-pointer">
+                    <span class="text-xs text-text-muted">&larr; Precedent</span>
+                    <p class="text-sm font-medium text-text-primary">{prev.data.title}</p>
+                  </a>
+                ) : <div />}
+                {next ? (
+                  <a href={`/guides/${next.id}`} class="flex-1 p-4 rounded-card border border-border hover:border-primary/30 transition-all cursor-pointer text-right">
+                    <span class="text-xs text-text-muted">Suivant &rarr;</span>
+                    <p class="text-sm font-medium text-text-primary">{next.data.title}</p>
+                  </a>
+                ) : <div />}
+              </>
+            );
+          })()}
+        </nav>
+      )}
+
+      <!-- Cross-links -->
+      <section class="mt-12">
+        <CrossLinks groups={crossLinkGroups} />
+      </section>
+    </div>
+  </main>
+
+  <Footer />
+
+  <!-- Schema.org -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": entry.data.title,
+    "description": entry.data.description,
+    "publisher": {
+      "@type": "Organization",
+      "name": "MySite",
+      "url": Astro.site?.toString(),
+    },
+  })} />
+</BaseLayout>

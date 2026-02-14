@@ -1,0 +1,22 @@
+# /etc/systemd/system/rebuild-sites.timer
+# Automatic rebuild every 6 hours for scheduled article publishing
+#
+# Install:
+#   sudo cp rebuild-sites.timer /etc/systemd/system/
+#   sudo cp rebuild-sites.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now rebuild-sites.timer
+#
+# Check status:
+#   sudo systemctl list-timers rebuild-sites.timer
+#   journalctl -t rebuild-sites --since "1 hour ago"
+
+[Unit]
+Description=Rebuild static sites for scheduled publishing
+
+[Timer]
+OnCalendar=*-*-* 00,06,12,18:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

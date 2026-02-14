@@ -1,0 +1,53 @@
+# Caddyfile — Reverse proxy for static Astro site
+# Caddy handles HTTPS automatically via Let's Encrypt
+#
+# Install:
+#   sudo cp Caddyfile /etc/caddy/Caddyfile
+#   sudo systemctl reload caddy
+#
+# TODO: Replace domain and paths
+
+# Redirect non-www to www (canonical)
+example.com {
+    redir https://www.example.com{uri} permanent
+}
+
+www.example.com {
+    # Serve static files from Astro build output
+    # TODO: Adjust path to your dist directory
+    root * /home/ubuntu/projects/my-site/site/dist
+
+    # Enable file server
+    file_server
+
+    # Compression
+    encode gzip zstd
+
+    # Cache static assets
+    @static {
+        path *.css *.js *.svg *.png *.jpg *.jpeg *.webp *.woff2 *.ico
+    }
+    header @static Cache-Control "public, max-age=31536000, immutable"
+
+    # Cache HTML (shorter TTL for content updates)
+    @html {
+        path *.html
+    }
+    header @html Cache-Control "public, max-age=3600"
+
+    # Security headers
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    # Handle SPA-style routing (try files, then index.html)
+    try_files {path} {path}/ {path}/index.html =404
+
+    # Custom 404
+    handle_errors {
+        rewrite * /404.html
+        file_server
+    }
+}

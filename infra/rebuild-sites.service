@@ -1,0 +1,12 @@
+# /etc/systemd/system/rebuild-sites.service
+# TODO: Adjust paths and user for your server
+
+[Unit]
+Description=Rebuild static site
+
+[Service]
+Type=oneshot
+User=ubuntu
+# TODO: Replace with your rebuild script path
+ExecStart=/usr/local/bin/rebuild-sites.sh
+Environment=PATH=/usr/bin:/usr/local/bin:/home/ubuntu/.nvm/versions/node/v22.0.0/bin

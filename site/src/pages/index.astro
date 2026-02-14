@@ -1,0 +1,105 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+import NewsletterCTA from '@/components/NewsletterCTA.astro';
+import { getCollection } from 'astro:content';
+
+// Get recent blog posts (published only)
+const now = new Date();
+const recentPosts = (await getCollection('blog', ({ data }) =>
+  data.pubDate.valueOf() <= now.valueOf()
+)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 6);
+
+// Get guide hubs
+const guideHubs = (await getCollection('guides', ({ data }) =>
+  data.type === 'hub' && (!data.pubDate || data.pubDate.valueOf() <= now.valueOf())
+)).sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout title="Mon Site | Accueil">
+  <Navbar />
+
+  <main class="pt-32 pb-16">
+    <!-- Hero -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-section">
+      <div class="max-w-3xl">
+        <h1 class="font-display font-800 text-display-lg leading-[1.05] mb-6 tracking-tight">
+          <!-- TODO: Replace with your headline -->
+          Votre titre<br />
+          <span class="text-gradient-primary">accrocheur ici</span>
+        </h1>
+        <p class="text-body-lg text-text-secondary max-w-xl mb-8">
+          Description de votre site. Guides pratiques, outils et ressources pour votre audience.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href="/guides" class="px-6 py-3 bg-primary text-void font-semibold rounded-lg hover:bg-primary-light transition-colors cursor-pointer">
+            Decouvrir les guides
+          </a>
+          <a href="/outils" class="px-6 py-3 border border-border text-text-secondary rounded-lg hover:border-primary/50 hover:text-primary transition-all cursor-pointer">
+            Voir les outils
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Guide Branches -->
+    {guideHubs.length > 0 && (
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-section">
+        <h2 class="font-display font-700 text-h2 mb-8">Nos guides</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {guideHubs.map((hub) => (
+            <a
+              href={`/guides/${hub.id}`}
+              class="p-5 rounded-card border border-border bg-surface-raised/30 hover:border-primary/30 transition-all cursor-pointer group"
+            >
+              <h3 class="font-display font-600 text-body-lg text-text-primary group-hover:text-primary transition-colors mb-2">
+                {hub.data.title}
+              </h3>
+              <p class="text-sm text-text-secondary line-clamp-2">{hub.data.description}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Recent Posts -->
+    {recentPosts.length > 0 && (
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-section">
+        <h2 class="font-display font-700 text-h2 mb-8">Articles recents</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {recentPosts.map((post) => (
+            <a
+              href={`/${post.id}`}
+              class="rounded-card border border-border bg-surface-raised/30 overflow-hidden hover:border-primary/30 transition-all cursor-pointer group"
+            >
+              {post.data.image && (
+                <img src={post.data.image} alt={post.data.title} class="w-full h-40 object-cover" loading="lazy" />
+              )}
+              <div class="p-5">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="px-2 py-0.5 text-xs bg-secondary/10 text-secondary-light rounded-full border border-secondary/20">
+                    {post.data.category}
+                  </span>
+                  {post.data.readingTime && (
+                    <span class="text-xs text-text-muted">{post.data.readingTime}</span>
+                  )}
+                </div>
+                <h3 class="font-display font-600 text-body text-text-primary group-hover:text-primary transition-colors mb-1">
+                  {post.data.title}
+                </h3>
+                <p class="text-sm text-text-secondary line-clamp-2">{post.data.description}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Newsletter -->
+    <NewsletterCTA />
+  </main>
+
+  <Footer />
+</BaseLayout>

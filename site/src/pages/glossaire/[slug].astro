@@ -1,0 +1,80 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const terms = await getCollection('glossary');
+  return terms.map((term) => ({
+    params: { slug: term.data.slug },
+    props: { term },
+  }));
+}
+
+const { term } = Astro.props;
+const { Content } = await render(term);
+---
+
+<BaseLayout
+  title={`${term.data.title} - Glossaire | MySite`}
+  description={term.data.shortDefinition}
+>
+  <Navbar />
+
+  <main class="pt-32 pb-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
+        <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
+        <span>/</span>
+        <a href="/glossaire" class="hover:text-primary transition-colors cursor-pointer">Glossaire</a>
+        <span>/</span>
+        <span class="text-text-secondary">{term.data.title}</span>
+      </nav>
+
+      <header class="mb-10">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="px-2.5 py-0.5 text-xs font-semibold bg-primary/10 text-primary rounded-full border border-primary/20">
+            {term.data.category}
+          </span>
+          <span class="px-2.5 py-0.5 text-xs bg-surface-raised text-text-muted rounded-full">
+            {term.data.difficulty}
+          </span>
+        </div>
+
+        <h1 class="font-display font-800 text-display leading-[1.1] mb-4 tracking-tight">
+          {term.data.title}
+        </h1>
+
+        <p class="text-body-lg text-text-secondary leading-relaxed">
+          {term.data.shortDefinition}
+        </p>
+      </header>
+
+      <article class="prose-custom">
+        <Content />
+      </article>
+
+      <!-- Related Terms -->
+      {term.data.relatedTerms.length > 0 && (
+        <div class="mt-12 p-6 rounded-card border border-border bg-surface-raised/30">
+          <h2 class="font-display font-600 text-body-lg text-text-primary mb-4">Termes lies</h2>
+          <div class="flex flex-wrap gap-2">
+            {term.data.relatedTerms.map((slug) => (
+              <a
+                href={`/glossaire/${slug}`}
+                class="px-3 py-1.5 rounded-lg text-sm border border-border text-text-secondary hover:border-primary/50 hover:text-primary transition-all cursor-pointer"
+              >
+                {slug}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>

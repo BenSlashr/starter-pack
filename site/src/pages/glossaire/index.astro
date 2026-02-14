@@ -1,0 +1,60 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const terms = (await getCollection('glossary')).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title)
+);
+
+// Group by first letter
+const grouped = terms.reduce((acc, term) => {
+  const letter = term.data.title[0].toUpperCase();
+  if (!acc[letter]) acc[letter] = [];
+  acc[letter].push(term);
+  return acc;
+}, {} as Record<string, typeof terms>);
+---
+
+<BaseLayout title="Glossaire | MySite" description="Tous les termes expliques simplement.">
+  <Navbar />
+
+  <main class="pt-32 pb-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="font-display font-800 text-display leading-[1.1] mb-4 tracking-tight">
+        Glossaire
+      </h1>
+      <p class="text-body-lg text-text-secondary mb-10">
+        {terms.length} termes expliques simplement.
+      </p>
+
+      {Object.entries(grouped).sort().map(([letter, letterTerms]) => (
+        <div class="mb-8">
+          <h2 class="font-display font-700 text-h3 text-primary mb-4 border-b border-border pb-2">{letter}</h2>
+          <div class="space-y-3">
+            {letterTerms.map((term) => (
+              <a
+                href={`/glossaire/${term.data.slug}`}
+                class="block p-4 rounded-card border border-border hover:border-primary/30 transition-all cursor-pointer group"
+              >
+                <div class="flex items-center justify-between">
+                  <h3 class="font-display font-600 text-body text-text-primary group-hover:text-primary transition-colors">
+                    {term.data.title}
+                  </h3>
+                  <span class="px-2 py-0.5 text-xs bg-surface-raised text-text-muted rounded-full">
+                    {term.data.difficulty}
+                  </span>
+                </div>
+                <p class="text-sm text-text-secondary mt-1">{term.data.shortDefinition}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>

@@ -1,0 +1,445 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — Dark editorial theme
+   Accent colors: Primary (gold) + Secondary (violet)
+   TODO: Customize colors, fonts, and spacing for your brand
+   ═══════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Color Palette ── */
+  --color-void: #04060C;
+  --color-abyss: #080C18;
+  --color-surface: #0E1525;
+  --color-surface-raised: #141D30;
+  --color-surface-hover: #1A2540;
+  --color-border: #1E2A45;
+  --color-border-subtle: #162035;
+
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  /* TODO: Replace with your brand accent colors */
+  --color-primary: #F59E0B;
+  --color-primary-light: #FBBF24;
+  --color-primary-dim: #B47108;
+
+  --color-secondary: #8B5CF6;
+  --color-secondary-light: #A78BFA;
+  --color-secondary-dim: #6D28D9;
+
+  --color-positive: #10B981;
+  --color-negative: #EF4444;
+  --color-info: #3B82F6;
+
+  /* ── Typography Scale ── */
+  /* TODO: Replace with your chosen fonts */
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --text-display-xl: 4.5rem;
+  --text-display-lg: 3.5rem;
+  --text-display: 2.75rem;
+  --text-h1: 2.25rem;
+  --text-h2: 1.75rem;
+  --text-h3: 1.375rem;
+  --text-body-lg: 1.125rem;
+  --text-body: 1rem;
+  --text-small: 0.875rem;
+  --text-xs: 0.75rem;
+
+  /* ── Spacing ── */
+  --spacing-section: 6rem;
+
+  /* ── Radius ── */
+  --radius-card: 0.75rem;
+  --radius-pill: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-glow-primary: 0 0 20px rgba(245, 158, 11, 0.15);
+  --shadow-glow-secondary: 0 0 20px rgba(139, 92, 246, 0.15);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Google Fonts ── */
+@font-face {
+  font-family: 'Syne';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 800;
+  src: url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap');
+}
+
+/* ── Base Styles ── */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-void);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+}
+
+/* ── Selection ── */
+::selection {
+  background-color: rgba(245, 158, 11, 0.3);
+  color: var(--color-text-primary);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-abyss);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ── Animations ── */
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-ticker {
+  animation: ticker-scroll 30s linear infinite;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ── Gradient text utility ── */
+.text-gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-secondary {
+  background: linear-gradient(135deg, var(--color-secondary), var(--color-secondary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Glass card ── */
+.glass {
+  background: rgba(14, 21, 37, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+}
+
+/* ── Noise overlay for depth ── */
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOSSARY TOOLTIPS — CSS-only inline definitions
+   ═══════════════════════════════════════════════════════════════ */
+
+.glossary-tooltip {
+  color: var(--color-primary);
+  text-decoration: underline dotted var(--color-primary-dim);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: help;
+  position: relative;
+}
+
+.glossary-tooltip:hover {
+  color: var(--color-primary-light);
+}
+
+.glossary-tooltip-content {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 280px;
+  width: max-content;
+  padding: 0.75rem 1rem;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  z-index: 50;
+  pointer-events: none;
+}
+
+.glossary-tooltip-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--color-border);
+}
+
+.glossary-tooltip:hover .glossary-tooltip-content,
+.glossary-tooltip:focus .glossary-tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.glossary-tooltip-title {
+  color: var(--color-primary);
+  font-size: var(--text-small);
+  font-family: var(--font-display);
+}
+
+.glossary-tooltip-def {
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .glossary-tooltip-content {
+    bottom: auto;
+    top: calc(100% + 10px);
+    left: 0;
+    transform: none;
+    max-width: 250px;
+  }
+  .glossary-tooltip-content::after {
+    top: auto;
+    bottom: 100%;
+    left: 16px;
+    border-top-color: transparent;
+    border-bottom-color: var(--color-border);
+  }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-ticker,
+  .animate-fade-in-up,
+  .animate-pulse-dot {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROSE — Article content styling
+   ═══════════════════════════════════════════════════════════════ */
+
+.prose-custom h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-h3);
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-text-primary);
+}
+.prose-custom h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+.prose-custom p {
+  color: var(--color-text-secondary);
+  line-height: 1.75;
+  margin-bottom: 1rem;
+}
+.prose-custom strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+.prose-custom a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-custom a:hover {
+  color: var(--color-primary-light);
+}
+.prose-custom ul, .prose-custom ol {
+  color: var(--color-text-secondary);
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+.prose-custom li {
+  margin-bottom: 0.5rem;
+  line-height: 1.75;
+}
+.prose-custom blockquote {
+  border-left: 3px solid var(--color-primary);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+.prose-custom hr {
+  border-color: var(--color-border);
+  margin: 2rem 0;
+}
+
+/* GitHub-style callout alerts */
+.prose-custom .markdown-alert {
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 0.75rem;
+  border-left: 4px solid;
+}
+.prose-custom .markdown-alert p {
+  margin-bottom: 0.25rem;
+}
+.prose-custom .markdown-alert p:last-child {
+  margin-bottom: 0;
+}
+.prose-custom .markdown-alert-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: 0.5rem !important;
+}
+.prose-custom .markdown-alert-title .octicon {
+  flex-shrink: 0;
+}
+
+/* TIP — primary accent */
+.prose-custom .markdown-alert-tip {
+  background: rgba(245, 158, 11, 0.06);
+  border-color: var(--color-primary);
+}
+.prose-custom .markdown-alert-tip .markdown-alert-title {
+  color: var(--color-primary);
+}
+
+/* NOTE — blue */
+.prose-custom .markdown-alert-note {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: #3b82f6;
+}
+.prose-custom .markdown-alert-note .markdown-alert-title {
+  color: #3b82f6;
+}
+
+/* WARNING — orange */
+.prose-custom .markdown-alert-warning {
+  background: rgba(249, 115, 22, 0.06);
+  border-color: #f97316;
+}
+.prose-custom .markdown-alert-warning .markdown-alert-title {
+  color: #f97316;
+}
+
+/* CAUTION — red */
+.prose-custom .markdown-alert-caution {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: #ef4444;
+}
+.prose-custom .markdown-alert-caution .markdown-alert-title {
+  color: #ef4444;
+}
+
+/* IMPORTANT — secondary accent */
+.prose-custom .markdown-alert-important {
+  background: rgba(139, 92, 246, 0.06);
+  border-color: var(--color-secondary);
+}
+.prose-custom .markdown-alert-important .markdown-alert-title {
+  color: var(--color-secondary);
+}
+
+.prose-custom .markdown-alert-title .octicon path {
+  fill: currentColor;
+}
+
+/* Tables */
+.prose-custom table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  overflow-x: auto;
+  display: block;
+}
+.prose-custom thead {
+  background: rgba(245, 158, 11, 0.08);
+}
+.prose-custom th {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid var(--color-primary);
+  white-space: nowrap;
+}
+.prose-custom td {
+  color: var(--color-text-secondary);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.prose-custom tbody tr:hover {
+  background: rgba(245, 158, 11, 0.04);
+}
+
+/* Mermaid diagrams */
+.prose-custom svg[id^="mermaid"] {
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem auto;
+  display: block;
+}

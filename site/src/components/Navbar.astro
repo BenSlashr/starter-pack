@@ -1,0 +1,137 @@
+---
+import Logo from './Logo.astro';
+
+// TODO: Replace with your navigation links
+const navLinks = [
+  { label: 'Guides', href: '/guides' },
+  { label: 'Outils', href: '/outils' },
+  { label: 'Glossaire', href: '/glossaire' },
+];
+---
+
+<header class="fixed top-0 left-0 right-0 z-50">
+  <nav class="glass border-b border-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo -->
+        <a href="/" class="cursor-pointer group">
+          <Logo variant="horizontal" size="sm" />
+        </a>
+
+        <!-- Nav Links (Desktop) -->
+        <div class="hidden md:flex items-center gap-1">
+          {navLinks.map((link) => (
+            <a
+              href={link.href}
+              class="px-3 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors duration-200 cursor-pointer rounded-lg hover:bg-surface-hover"
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-3">
+          <a
+            href="/newsletter"
+            class="hidden sm:inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-void rounded-lg hover:bg-primary-light transition-colors duration-200 cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Newsletter
+          </a>
+
+          <!-- Mobile Menu Toggle -->
+          <button
+            id="mobile-menu-btn"
+            class="md:hidden w-9 h-9 rounded-lg border border-border hover:border-text-muted flex items-center justify-center transition-colors duration-200 cursor-pointer"
+            aria-label="Menu"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
+          >
+            <svg id="menu-icon-open" class="w-4 h-4 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <svg id="menu-icon-close" class="w-4 h-4 text-text-secondary hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu Panel -->
+  <div
+    id="mobile-menu"
+    class="md:hidden fixed inset-x-0 top-16 bottom-0 bg-abyss/95 backdrop-blur-xl border-t border-border transform translate-y-full opacity-0 transition-all duration-300 ease-out pointer-events-none z-40"
+  >
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      <div class="flex flex-col gap-1">
+        {navLinks.map((link) => (
+          <a
+            href={link.href}
+            class="mobile-nav-link flex items-center justify-between px-4 py-3.5 text-base font-medium text-text-secondary hover:text-text-primary rounded-xl hover:bg-surface-hover transition-all duration-200 cursor-pointer"
+          >
+            {link.label}
+            <svg class="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        ))}
+      </div>
+
+      <div class="mt-6 pt-6 border-t border-border">
+        <a
+          href="/newsletter"
+          class="flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold bg-primary text-void rounded-xl hover:bg-primary-light transition-colors duration-200 cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          S'abonner a la newsletter
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const iconOpen = document.getElementById('menu-icon-open');
+  const iconClose = document.getElementById('menu-icon-close');
+  let isOpen = false;
+
+  function toggleMenu() {
+    isOpen = !isOpen;
+    btn?.setAttribute('aria-expanded', String(isOpen));
+
+    if (isOpen) {
+      menu?.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
+      menu?.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+      iconOpen?.classList.add('hidden');
+      iconClose?.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    } else {
+      menu?.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
+      menu?.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+      iconOpen?.classList.remove('hidden');
+      iconClose?.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+  }
+
+  btn?.addEventListener('click', toggleMenu);
+
+  document.querySelectorAll('.mobile-nav-link').forEach((link) => {
+    link.addEventListener('click', () => {
+      if (isOpen) toggleMenu();
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen) toggleMenu();
+  });
+</script>
