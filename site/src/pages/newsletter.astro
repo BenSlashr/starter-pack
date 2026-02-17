@@ -1,0 +1,234 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+import NewsletterForm from '@/components/NewsletterForm.tsx';
+
+// TODO: Replace MySite with your site name
+const seoTitle = 'Newsletter Gratuite - MySite';
+const seoDescription = "Recevez chaque semaine l'essentiel de nos contenus. Gratuite, sans spam, desabonnement en 1 clic.";
+
+// TODO: Customize features for your newsletter
+const features = [
+  {
+    icon: 'M13 10V3L4 14h7v7l9-11h-7z',
+    title: 'Recap de la semaine',
+    description: "Les articles et actus a retenir, expliques simplement. Pas de jargon, pas de blabla.",
+    color: 'text-primary',
+    bg: 'bg-primary/10 border-primary/20',
+  },
+  {
+    icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9',
+    title: 'Alertes et nouveautes',
+    description: "Nouveaux guides, outils et mises a jour : l'info qui compte, quand elle compte.",
+    color: 'text-secondary-light',
+    bg: 'bg-secondary/10 border-secondary/20',
+  },
+  {
+    icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+    title: 'Contenu exclusif',
+    description: "Guides en avant-premiere, analyses reservees aux abonnes, ressources bonus.",
+    color: 'text-primary',
+    bg: 'bg-primary/10 border-primary/20',
+  },
+];
+
+// TODO: Update stats with your numbers
+const stats = [
+  { value: '10+', label: 'Guides publies' },
+  { value: '5', label: 'Categories' },
+  { value: '3', label: 'Outils gratuits' },
+  { value: '0', label: 'Publicites' },
+];
+
+// TODO: Customize FAQ items
+const faqItems = [
+  {
+    q: 'A quelle frequence est envoyee la newsletter ?',
+    a: "Une fois par semaine. Un seul email, bien condense, pour ne rien rater sans surcharger votre boite mail.",
+  },
+  {
+    q: "C'est vraiment gratuit ?",
+    a: "Oui, 100% gratuit. Pas de version payante cachee, pas de contenu bloque.",
+  },
+  {
+    q: 'Que faites-vous de mes donnees ?',
+    a: "Votre email est stocke chez Mailchimp (serveurs securises). On ne revend jamais vos donnees. On ne partage rien avec des tiers.",
+  },
+  {
+    q: 'Comment me desabonner ?',
+    a: "Un lien de desabonnement est present en bas de chaque email. Un clic et c'est fait, sans justification ni delai.",
+  },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqItems.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.a,
+    },
+  })),
+};
+---
+
+<BaseLayout title={seoTitle} description={seoDescription}>
+  <Navbar />
+
+  <main id="main-content">
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-b from-primary/3 via-transparent to-transparent"></div>
+      <div class="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/5 rounded-full blur-[150px] pointer-events-none"></div>
+      <div class="absolute bottom-0 right-1/3 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center justify-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
+          <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
+          <span>/</span>
+          <span class="text-text-secondary">Newsletter</span>
+        </nav>
+
+        <!-- Badge -->
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 mb-6 text-xs font-medium bg-primary/10 text-primary border border-primary/20 rounded-full">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+          </span>
+          Newsletter gratuite
+        </div>
+
+        <!-- Heading -->
+        <h1 class="font-display font-800 text-display leading-[1.1] mb-6 tracking-tight">
+          Nos meilleurs contenus,<br />
+          <span class="text-gradient-primary">chaque semaine</span>
+        </h1>
+
+        <p class="text-body-lg text-text-secondary mb-10 max-w-lg mx-auto">
+          Un email par semaine, zero spam. L'essentiel de nos contenus resume simplement. Desabonnement en 1 clic.
+        </p>
+
+        <!-- Form -->
+        <div class="max-w-md mx-auto mb-6">
+          <NewsletterForm client:visible layout="inline" />
+        </div>
+
+        <p class="text-xs text-text-muted">
+          {stats[0].value} guides &middot; {stats[2].value} outils gratuits &middot; 100% independant
+        </p>
+      </div>
+    </section>
+
+    <!-- Ce que vous recevez -->
+    <section class="py-section relative">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="font-display font-800 text-h1 leading-tight mb-4 tracking-tight">
+            Ce que vous <span class="text-gradient-primary">recevez</span>
+          </h2>
+          <p class="text-body text-text-secondary max-w-lg mx-auto">
+            Chaque semaine dans votre boite mail, en moins de 5 minutes de lecture.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {features.map((f) => (
+            <div class="p-6 rounded-card bg-surface border border-border hover:border-primary/20 transition-colors duration-300">
+              <div class={`w-12 h-12 rounded-card ${f.bg} border flex items-center justify-center mb-4`}>
+                <svg class={`w-6 h-6 ${f.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d={f.icon} />
+                </svg>
+              </div>
+              <h3 class="font-display font-700 text-h3 mb-2">{f.title}</h3>
+              <p class="text-sm text-text-secondary leading-relaxed">{f.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="py-section relative">
+      <div class="absolute inset-0 bg-gradient-to-r from-primary/3 via-transparent to-secondary/3"></div>
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center mb-12">
+          <h2 class="font-display font-800 text-h1 leading-tight mb-4 tracking-tight">
+            Pourquoi <span class="text-gradient-primary">nous suivre</span> ?
+          </h2>
+          <p class="text-body text-text-secondary max-w-lg mx-auto">
+            Un site independant, construit pour rendre l'information accessible.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {stats.map((s) => (
+            <div class="text-center p-6 rounded-card bg-surface/50 border border-border">
+              <p class="font-display font-800 text-3xl text-primary mb-1">{s.value}</p>
+              <p class="text-sm text-text-secondary">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-section">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10">
+          <h2 class="font-display font-800 text-h1 leading-tight mb-4 tracking-tight">
+            Questions <span class="text-gradient-primary">frequentes</span>
+          </h2>
+        </div>
+
+        <div class="space-y-4">
+          {faqItems.map((item) => (
+            <details class="group rounded-card border border-border bg-surface/50 overflow-hidden">
+              <summary class="flex items-center justify-between gap-4 px-6 py-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <h3 class="font-display font-600 text-sm text-text-primary">{item.q}</h3>
+                <svg class="w-5 h-5 text-text-muted flex-shrink-0 transition-transform duration-200 group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-4">
+                <p class="text-sm text-text-secondary leading-relaxed">{item.a}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA final -->
+    <section class="py-section relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5"></div>
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-primary/8 rounded-full blur-[130px] pointer-events-none"></div>
+
+      <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <h2 class="font-display font-800 text-h1 leading-tight mb-4 tracking-tight">
+          Pret a rester <span class="text-gradient-primary">informe</span> ?
+        </h2>
+        <p class="text-body text-text-secondary mb-8 max-w-lg mx-auto">
+          Un email par semaine, l'essentiel sans le bruit.
+        </p>
+
+        <div class="max-w-sm mx-auto mb-4">
+          <NewsletterForm client:visible layout="stacked" />
+        </div>
+
+        <p class="text-xs text-text-muted">
+          Gratuit pour toujours. Desabonnement en un clic.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+
+  <!-- FAQ Schema.org -->
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+</BaseLayout>

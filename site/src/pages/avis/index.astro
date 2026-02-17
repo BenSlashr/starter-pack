@@ -1,0 +1,177 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+import FAQSection from '@/components/FAQSection.astro';
+import { getReviewsSortedByScore } from '@/data/reviews';
+import { FAQS } from '@/data/faqs';
+
+const reviews = getReviewsSortedByScore();
+const faqItems = FAQS['avis'] ?? [];
+---
+
+<BaseLayout
+  title="Meilleurs produits 2026 : Comparatif et avis | MySite"
+  description="Classement des meilleurs produits et services. Avis detailles, notes, tarifs et comparatifs pour faire le bon choix."
+>
+  <Navbar />
+
+  <main id="main-content" class="pt-32 pb-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
+        <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
+        <span>/</span>
+        <span class="text-text-secondary">Avis</span>
+      </nav>
+
+      <!-- Hero -->
+      <header class="mb-12">
+        <h1 class="font-display font-800 text-display leading-[1.1] mb-4 tracking-tight">
+          <!-- TODO: Replace with your domain -->
+          Les meilleurs produits<br />
+          <span class="text-gradient-primary">en {new Date().getFullYear()}</span>
+        </h1>
+        <p class="text-body-lg text-text-secondary max-w-xl">
+          Classement base sur nos tests complets. Notes, tarifs, fonctionnalites et verdict pour chaque produit.
+        </p>
+        <div class="mt-3">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs border border-border text-text-muted">
+            <span class="w-1.5 h-1.5 rounded-full bg-positive animate-pulse"></span>
+            Mis a jour en {new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+          </span>
+        </div>
+      </header>
+
+      <!-- Ranking table -->
+      <div class="overflow-x-auto mb-12">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="border-b border-border">
+              <th class="text-left py-3 px-4 text-text-muted font-medium text-xs uppercase tracking-wider w-10">#</th>
+              <th class="text-left py-3 px-4 text-text-muted font-medium text-xs uppercase tracking-wider">Produit</th>
+              <th class="text-left py-3 px-4 text-text-muted font-medium text-xs uppercase tracking-wider">Note</th>
+              <th class="text-left py-3 px-4 text-text-muted font-medium text-xs uppercase tracking-wider hidden sm:table-cell">Verdict</th>
+              <th class="text-right py-3 px-4 text-text-muted font-medium text-xs uppercase tracking-wider"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {reviews.map((review, i) => (
+              <tr class="border-b border-border/50 hover:bg-surface-hover/30 transition-colors">
+                <td class="py-4 px-4">
+                  <span class={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                    i === 0 ? 'bg-primary/20 text-primary' : 'bg-surface-raised text-text-muted'
+                  }`}>
+                    {i + 1}
+                  </span>
+                </td>
+                <td class="py-4 px-4">
+                  <a href={`/avis/${review.slug}`} class="flex items-center gap-3 cursor-pointer group">
+                    <div class="w-8 h-8 rounded-lg bg-surface-raised border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {review.logo ? (
+                        <img src={review.logo} alt={review.name} class="w-6 h-6 object-contain" loading="lazy" />
+                      ) : (
+                        <span class="text-xs font-bold text-text-muted">{review.name[0]}</span>
+                      )}
+                    </div>
+                    <span class="font-medium text-text-primary group-hover:text-primary transition-colors">{review.name}</span>
+                  </a>
+                </td>
+                <td class="py-4 px-4">
+                  <div class="flex items-center gap-2">
+                    <span class={`text-sm font-bold ${review.overallScore >= 8 ? 'text-positive' : review.overallScore >= 6 ? 'text-primary' : 'text-text-secondary'}`}>
+                      {review.overallScore}/10
+                    </span>
+                    <div class="w-16 h-1.5 rounded-full bg-surface-raised overflow-hidden hidden md:block">
+                      <div class="h-full rounded-full bg-primary" style={`width: ${review.overallScore * 10}%`}></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-4 hidden sm:table-cell">
+                  <p class="text-xs text-text-secondary line-clamp-2 max-w-xs">{review.verdict}</p>
+                </td>
+                <td class="py-4 px-4 text-right">
+                  <a
+                    href={`/avis/${review.slug}`}
+                    class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border border-border hover:border-primary/50 hover:text-primary transition-all cursor-pointer"
+                  >
+                    Lire l'avis
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Methodology -->
+      <section class="mb-12 p-6 rounded-card border border-border bg-surface-raised/30">
+        <h2 class="font-display font-700 text-h3 mb-4">Comment nous testons</h2>
+        <p class="text-sm text-text-secondary leading-relaxed mb-4">
+          <!-- TODO: Replace with your real testing methodology -->
+          Chaque produit est teste pendant au moins 2 semaines par notre equipe.
+          Nous evaluons 5 criteres : facilite d'utilisation, fonctionnalites, rapport qualite-prix,
+          support client et fiabilite. La note finale est une moyenne ponderee de ces criteres.
+        </p>
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          {['Utilisation', 'Fonctionnalites', 'Prix', 'Support', 'Fiabilite'].map((criterion) => (
+            <div class="text-center p-2 rounded-lg bg-surface-hover/30">
+              <span class="text-xs text-text-muted">{criterion}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Cross-links -->
+      <section class="mb-12">
+        <h2 class="font-display font-700 text-h3 mb-6">Explorer aussi</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <a href="/comparer" class="p-4 rounded-card border border-border hover:border-primary/30 transition-all cursor-pointer group">
+            <p class="text-sm font-medium text-text-primary group-hover:text-primary transition-colors">Comparatifs</p>
+            <p class="text-xs text-text-muted">Comparer deux produits</p>
+          </a>
+          <a href="/guides" class="p-4 rounded-card border border-border hover:border-primary/30 transition-all cursor-pointer group">
+            <p class="text-sm font-medium text-text-primary group-hover:text-primary transition-colors">Guides</p>
+            <p class="text-xs text-text-muted">Tutoriels et conseils</p>
+          </a>
+          <a href="/outils" class="p-4 rounded-card border border-border hover:border-primary/30 transition-all cursor-pointer group">
+            <p class="text-sm font-medium text-text-primary group-hover:text-primary transition-colors">Outils</p>
+            <p class="text-xs text-text-muted">Outils interactifs</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      {faqItems.length > 0 && (
+        <div class="mb-12">
+          <FAQSection items={faqItems} />
+        </div>
+      )}
+
+      <!-- Disclaimer -->
+      <div class="p-4 rounded-card border border-border bg-surface-raised/20">
+        <p class="text-xs text-text-muted leading-relaxed">
+          <!-- TODO: Replace with your disclaimer -->
+          Les avis exprimes sur cette page sont bases sur nos tests independants.
+          Certains liens peuvent etre des liens affilies. Cela n'influence pas nos notes ni nos recommandations.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+
+  <!-- Schema.org BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": Astro.site?.toString() },
+      { "@type": "ListItem", "position": 2, "name": "Avis" },
+    ],
+  })} />
+</BaseLayout>

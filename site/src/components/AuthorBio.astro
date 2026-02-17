@@ -1,0 +1,27 @@
+---
+interface Props {
+  name?: string;
+  bio?: string;
+  avatar?: string;
+}
+
+const {
+  // TODO: Replace with your author info
+  name = 'L\'auteur',
+  bio = 'Redacteur passionné. Il partage ses connaissances à travers des guides pratiques et des outils gratuits.',
+  avatar = '/avatar.webp',
+} = Astro.props;
+---
+
+<div class="mt-12 p-5 rounded-card border border-border bg-surface/50 flex items-center gap-4">
+  <img
+    src={avatar}
+    alt={name}
+    class="w-12 h-12 rounded-full border border-primary/30 object-cover flex-shrink-0"
+    loading="lazy"
+  />
+  <div>
+    <p class="font-display font-700 text-sm text-text-primary">{name}</p>
+    <p class="text-xs text-text-secondary">{bio}</p>
+  </div>
+</div>

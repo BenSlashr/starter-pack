@@ -13,23 +13,50 @@ Avant de toucher aux scripts, il faut adapter le site Astro lui-même au thème 
 | Fichier | Quoi changer |
 |---------|-------------|
 | `site/src/styles/global.css` | Palette de couleurs (primary, secondary, accent, background), fonts, espacements |
-| `site/src/layouts/BaseLayout.astro` | Titre du site, meta description par défaut, favicon, OG image |
-| `site/src/components/layout/Header.astro` | Logo/nom du site, liens de navigation, catégories dans le menu |
-| `site/src/components/layout/Footer.astro` | Nom du site, liens légaux, réseaux sociaux |
+| `site/src/layouts/BaseLayout.astro` | Titre du site, meta description par défaut, favicon, OG image, og:site_name, theme-color |
+| `site/src/components/Navbar.astro` | Logo/nom du site, liens de navigation, catégories dans le menu |
+| `site/src/components/Footer.astro` | Nom du site, liens légaux, réseaux sociaux, description |
+| `site/src/components/Logo.astro` | SVG du logo et nom du site |
 | `site/src/pages/index.astro` | Sections homepage, hero, textes d'accroche |
-| `site/src/pages/a-propos.astro` | Bio du persona, histoire du site |
+| `site/src/pages/a-propos.astro` | Bio du persona, avatar, histoire du site, différenciateurs |
+| `site/src/pages/contact.astro` | Email de contact, sujets courants |
+| `site/src/pages/newsletter.astro` | Features newsletter, stats, FAQ, aperçu numéro |
+| `site/src/pages/cgu.astro` | Nom du site, domaine, email de contact, sections légales |
+| `site/src/pages/confidentialite.astro` | Hébergeur, email, services tiers, données collectées |
+| `site/src/pages/outils/index.astro` | Outils du site, catégories, FAQ outils |
+| `site/src/components/AuthorBio.astro` | Nom, bio et avatar de l'auteur (affiché sous chaque article) |
+| `site/src/components/ToolsShowcase.astro` | Outils mis en avant sur la homepage |
+| `site/src/components/BranchExplorer.astro` | Icônes et descriptions par branche de guides |
+| `site/src/data/faqs.ts` | FAQ par slug de page (active Schema.org FAQPage) |
+| `site/src/data/internal-links.ts` | Liens de maillage interne par branche/catégorie |
+| `site/src/data/reviews.ts` | Produits/services a reviewer (notes, pros/cons, tarifs, editorial, FAQ) |
+| `site/src/data/comparisons.ts` | Items a comparer (specs, categories, paires populaires, contenu genere) |
+| `site/src/pages/avis/index.astro` | Titre hero, methodologie, disclaimer, cross-links |
+| `site/src/pages/avis/[slug].astro` | CTA texte, disclaimer, type Schema.org Review (`SoftwareApplication` par defaut) |
+| `site/src/pages/comparer/index.astro` | Titre hero, description, cross-links |
+| `site/src/pages/comparer/[pair].astro` | Disclaimer, liens vers avis |
 | `site/astro.config.mjs` | Domaine (`site:`), intégrations, redirects |
-| `site/tailwind.config.*` | Tokens Tailwind custom si utilisés hors CSS |
 | `CLAUDE.md` | Domaine, catégories, structure du contenu, frontmatter, palette Mermaid |
 
 ### Checklist thème
 
 - [ ] Choisir une palette de 3-4 couleurs cohérente (primary, secondary, accent, fond)
 - [ ] Adapter les couleurs CSS dans `global.css`
-- [ ] Remplacer le nom du site dans Header, Footer, BaseLayout
+- [ ] Remplacer le nom du site dans Navbar, Footer, BaseLayout, pages légales
 - [ ] Mettre à jour les catégories de contenu (nav, footer, routing)
-- [ ] Adapter la homepage (hero, textes, sections)
-- [ ] Créer la page à propos avec le persona du site
+- [ ] Adapter la homepage (hero, textes, sections, BranchExplorer, ToolsShowcase)
+- [ ] Personnaliser la page à propos avec le persona du site
+- [ ] Personnaliser la page contact (email, sujets)
+- [ ] Personnaliser la page newsletter (features, stats, FAQ)
+- [ ] Adapter les pages légales (CGU, confidentialité) avec vos infos
+- [ ] Adapter le hub outils avec vos outils réels
+- [ ] Remplir `data/faqs.ts` avec vos FAQ par page
+- [ ] Remplir `data/internal-links.ts` avec vos liens de maillage
+- [ ] Personnaliser `AuthorBio.astro` (nom, bio, avatar)
+- [ ] Ajouter les icônes de branches dans `BranchExplorer.astro`
+- [ ] Remplir `data/reviews.ts` avec vos produits/services (notes, pros/cons, tarifs, FAQ)
+- [ ] Remplir `data/comparisons.ts` avec vos items a comparer (specs, categories)
+- [ ] Adapter `avis/[slug].astro` : type Schema.org Review (SoftwareApplication, Product, etc.)
 - [ ] Configurer le domaine dans `astro.config.mjs`
 - [ ] Mettre à jour le `CLAUDE.md` avec toutes les infos du nouveau site
 

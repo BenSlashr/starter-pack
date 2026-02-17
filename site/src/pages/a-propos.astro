@@ -1,0 +1,99 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+
+// TODO: Replace MySite, author info, and differentiators with your own
+---
+
+<BaseLayout
+  title="A propos - MySite"
+  description="Decouvrez l'equipe derriere MySite. Des passionnes qui creent des guides pratiques et des outils gratuits."
+>
+  <Navbar />
+
+  <main id="main-content" class="pt-32 pb-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
+        <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
+        <span>/</span>
+        <span class="text-text-secondary">A propos</span>
+      </nav>
+
+      <h1 class="font-display font-800 text-display leading-[1.1] mb-6 tracking-tight">
+        A <span class="text-gradient-primary">propos</span>
+      </h1>
+
+      <div class="space-y-6 text-text-secondary text-body leading-relaxed">
+        <p>
+          <!-- TODO: Replace with your site description -->
+          MySite est un projet independant porte par des passionnes. On ecrit, on code, on teste - et on partage tout gratuitement.
+        </p>
+
+        <!-- Author card -->
+        <div class="p-6 rounded-card bg-surface border border-border">
+          <div class="flex items-start gap-4">
+            <!-- TODO: Replace with your avatar (place it at /public/avatar.webp) -->
+            <img
+              src="/avatar.webp"
+              alt="Fondateur"
+              class="w-14 h-14 rounded-full border border-primary/30 object-cover flex-shrink-0"
+              loading="eager"
+            />
+            <div>
+              <!-- TODO: Replace with your name/pseudo and bio -->
+              <h2 class="font-display font-700 text-h3 text-text-primary mb-1">
+                Le fondateur <span class="text-xs font-normal text-text-muted">- Auteur & redacteur</span>
+              </h2>
+              <p class="text-sm text-text-secondary">
+                Passionné par son sujet, il lance MySite pour partager des guides pratiques et accessibles. Depuis, le site grandit avec un seul objectif : rendre l'information accessible a tous, gratuitement.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="font-display font-700 text-h2 text-text-primary pt-4">Ce qui nous differencie</h2>
+
+        <!-- TODO: Replace with your actual differentiators -->
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+            </svg>
+            <span><strong class="text-text-primary">Zero publicite.</strong> Pas de bannieres, pas de pop-ups, pas de contenu sponsorise deguise.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+            </svg>
+            <span><strong class="text-text-primary">Transparence totale.</strong> Nos revenus viennent de liens affilies, toujours signales. Nos avis restent independants.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+            </svg>
+            <span><strong class="text-text-primary">Contenu pratique.</strong> Chaque guide est pense pour etre actionnable. Pas de theorie creuse, des etapes concretes.</span>
+          </li>
+        </ul>
+
+        <p>
+          Une question, une suggestion, une erreur reperee ? Ecrivez-nous via la page <a href="/contact" class="text-primary hover:underline">contact</a>.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+
+  <!-- Schema.org BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": Astro.site?.toString() },
+      { "@type": "ListItem", "position": 2, "name": "A propos" },
+    ],
+  })} />
+</BaseLayout>

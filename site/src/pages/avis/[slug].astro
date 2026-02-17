@@ -1,0 +1,374 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+import CrossLinks from '@/components/CrossLinks.astro';
+import FAQSection from '@/components/FAQSection.astro';
+import AuthorBio from '@/components/AuthorBio.astro';
+import { REVIEWS, getReviewsSortedByScore, type Review } from '@/data/reviews';
+
+export function getStaticPaths() {
+  return Object.values(REVIEWS).map((review) => ({
+    params: { slug: review.slug },
+    props: { review },
+  }));
+}
+
+interface Props {
+  review: Review;
+}
+
+const { review } = Astro.props;
+
+const allReviews = getReviewsSortedByScore();
+const alternativeReviews = review.alternatives
+  .map(slug => REVIEWS[slug])
+  .filter(Boolean);
+
+const scoreColor = review.overallScore >= 8 ? 'text-positive' : review.overallScore >= 6 ? 'text-primary' : 'text-text-secondary';
+---
+
+<BaseLayout
+  title={review.metaTitle}
+  description={review.metaDescription}
+  ogImage={review.logo}
+  ogImageAlt={review.name}
+>
+  <Navbar />
+
+  <main id="main-content" class="pt-32 pb-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
+        <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
+        <span>/</span>
+        <a href="/avis" class="hover:text-primary transition-colors cursor-pointer">Avis</a>
+        <span>/</span>
+        <span class="text-text-secondary">{review.name}</span>
+      </nav>
+
+      <!-- Hero -->
+      <header class="mb-10">
+        <div class="flex items-start gap-4 mb-6">
+          <div class="w-14 h-14 rounded-xl bg-surface-raised border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
+            {review.logo ? (
+              <img src={review.logo} alt={review.name} class="w-10 h-10 object-contain" />
+            ) : (
+              <span class="text-xl font-bold text-text-muted">{review.name[0]}</span>
+            )}
+          </div>
+          <div class="flex-1">
+            <h1 class="font-display font-800 text-display leading-[1.1] mb-2 tracking-tight">
+              Avis {review.name}
+            </h1>
+            <p class="text-body-lg text-text-secondary leading-relaxed">
+              {review.verdict}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 text-sm text-text-muted">
+          <!-- Score badge -->
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/5">
+            <span class={`text-lg font-bold ${scoreColor}`}>{review.overallScore}</span>
+            <span class="text-text-muted">/10</span>
+          </div>
+
+          <!-- Last updated -->
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border">
+            <span class="w-1.5 h-1.5 rounded-full bg-positive animate-pulse"></span>
+            Mis a jour le {new Date(review.lastUpdated).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </span>
+        </div>
+
+        <!-- CTA -->
+        <div class="mt-6">
+          <a
+            href={review.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-void font-semibold rounded-lg hover:bg-primary-light transition-colors cursor-pointer"
+          >
+            <!-- TODO: Customize CTA text -->
+            Voir {review.name}
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        </div>
+      </header>
+
+      <!-- Quick Facts Grid -->
+      <section class="mb-10">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {review.facts.map((fact) => (
+            <div class="p-3 rounded-lg border border-border bg-surface-raised/30 text-center">
+              <p class="text-xs text-text-muted mb-1">{fact.label}</p>
+              <p class="text-sm font-medium text-text-primary">{fact.value}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Pros & Cons -->
+      <section class="mb-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-5 rounded-card border border-positive/20 bg-positive/5">
+            <h2 class="font-display font-700 text-sm text-positive mb-3 uppercase tracking-wider">Avantages</h2>
+            <ul class="space-y-2">
+              {review.pros.map((pro) => (
+                <li class="flex items-start gap-2 text-sm text-text-secondary">
+                  <svg class="w-4 h-4 text-positive flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {pro}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div class="p-5 rounded-card border border-negative/20 bg-negative/5">
+            <h2 class="font-display font-700 text-sm text-negative mb-3 uppercase tracking-wider">Inconvenients</h2>
+            <ul class="space-y-2">
+              {review.cons.map((con) => (
+                <li class="flex items-start gap-2 text-sm text-text-secondary">
+                  <svg class="w-4 h-4 text-negative flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  {con}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Key Takeaways -->
+      <section class="mb-10 p-5 rounded-card border border-primary/20 bg-primary/5">
+        <h2 class="font-display font-700 text-sm text-primary mb-3 uppercase tracking-wider">Points cles</h2>
+        <ul class="space-y-2">
+          {review.keyTakeaways.map((point) => (
+            <li class="flex items-start gap-2 text-sm text-text-secondary leading-relaxed">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+              {point}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <!-- Detailed Ratings -->
+      <section class="mb-10">
+        <h2 class="font-display font-700 text-h2 mb-6">Notes detaillees</h2>
+        <div class="space-y-4">
+          {review.ratings.map((rating) => (
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-sm text-text-secondary">{rating.label}</span>
+                <span class="text-sm font-bold text-text-primary">{rating.score}/10</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-surface-raised overflow-hidden">
+                <div
+                  class="h-full rounded-full bg-primary transition-all"
+                  style={`width: ${rating.score * 10}%`}
+                ></div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div class="mt-4 flex items-center gap-2 pt-3 border-t border-border">
+          <span class="text-sm text-text-muted">Note globale :</span>
+          <span class={`text-lg font-bold ${scoreColor}`}>{review.overallScore}/10</span>
+        </div>
+      </section>
+
+      <!-- Pricing -->
+      {review.pricing.length > 0 && (
+        <section class="mb-10">
+          <h2 class="font-display font-700 text-h2 mb-6">Tarifs</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {review.pricing.map((tier) => (
+              <div class={`p-4 rounded-card border text-center ${tier.highlight ? 'border-primary/50 bg-primary/5' : 'border-border bg-surface-raised/30'}`}>
+                {tier.highlight && (
+                  <span class="inline-block px-2 py-0.5 text-xs font-semibold text-primary bg-primary/10 rounded-full mb-2">Populaire</span>
+                )}
+                <p class="text-sm font-medium text-text-primary mb-1">{tier.name}</p>
+                <p class="text-lg font-bold text-text-primary">{tier.price}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Editorial Sections -->
+      {review.editorialSections.map((section) => (
+        <section id={section.id} class="mb-10">
+          <h2 class="font-display font-700 text-h2 mb-4">{section.title}</h2>
+          <div class="text-text-secondary leading-relaxed whitespace-pre-line">
+            {section.content}
+          </div>
+        </section>
+      ))}
+
+      <!-- How to Get Started -->
+      {review.howToSteps.length > 0 && (
+        <section class="mb-10">
+          <h2 class="font-display font-700 text-h2 mb-6">Comment demarrer</h2>
+          <div class="space-y-4">
+            {review.howToSteps.map((step, i) => (
+              <div class="flex items-start gap-4 p-4 rounded-lg border border-border bg-surface-raised/30">
+                <span class="w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold flex items-center justify-center flex-shrink-0">
+                  {i + 1}
+                </span>
+                <div>
+                  <p class="text-sm font-medium text-text-primary mb-1">{step.title}</p>
+                  <p class="text-sm text-text-secondary">{step.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Alternatives -->
+      {alternativeReviews.length > 0 && (
+        <section class="mb-10">
+          <h2 class="font-display font-700 text-h2 mb-6">Alternatives a {review.name}</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {alternativeReviews.map((alt) => (
+              <a
+                href={`/avis/${alt.slug}`}
+                class="flex items-center gap-3 p-4 rounded-card border border-border hover:border-primary/30 transition-all cursor-pointer group"
+              >
+                <div class="w-10 h-10 rounded-lg bg-surface-raised border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {alt.logo ? (
+                    <img src={alt.logo} alt={alt.name} class="w-7 h-7 object-contain" loading="lazy" />
+                  ) : (
+                    <span class="text-sm font-bold text-text-muted">{alt.name[0]}</span>
+                  )}
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-text-primary group-hover:text-primary transition-colors">{alt.name}</p>
+                  <p class="text-xs text-text-muted">{alt.overallScore}/10</p>
+                </div>
+                <svg class="w-4 h-4 text-text-muted group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- CTA -->
+      <section class="mb-10 p-6 rounded-card border border-primary/30 bg-primary/5 text-center">
+        <h2 class="font-display font-700 text-h3 mb-2">Verdict : {review.overallScore}/10</h2>
+        <p class="text-sm text-text-secondary mb-4">{review.verdict}</p>
+        <a
+          href={review.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-void font-semibold rounded-lg hover:bg-primary-light transition-colors cursor-pointer"
+        >
+          Voir {review.name}
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      </section>
+
+      <!-- FAQ -->
+      {review.faq.length > 0 && (
+        <section class="mb-10">
+          <h2 class="font-display font-700 text-h2 mb-6">Questions frequentes</h2>
+          <div class="space-y-3">
+            {review.faq.map((item) => (
+              <details class="group rounded-card border border-border bg-surface-raised/30 overflow-hidden">
+                <summary class="flex items-center justify-between p-5 cursor-pointer text-text-primary font-medium hover:text-primary transition-colors">
+                  {item.q}
+                  <svg class="w-5 h-5 text-text-muted group-open:rotate-180 transition-transform flex-shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div class="px-5 pb-5 text-sm text-text-secondary leading-relaxed">
+                  {item.a}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Author Bio -->
+      <AuthorBio />
+
+      <!-- Disclaimer -->
+      <div class="mt-8 p-4 rounded-card border border-border bg-surface-raised/20">
+        <p class="text-xs text-text-muted leading-relaxed">
+          <!-- TODO: Replace with your disclaimer -->
+          Cet avis est base sur nos tests independants.
+          Certains liens peuvent etre des liens affilies, ce qui nous aide a financer notre site sans cout supplementaire pour vous.
+          Cela n'influence pas nos notes ni nos recommandations.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+
+  <!-- Schema.org Review -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Review",
+    "name": `Avis ${review.name}`,
+    "reviewBody": review.verdict,
+    "author": {
+      "@type": "Organization",
+      "name": "MySite",
+    },
+    "itemReviewed": {
+      "@type": "SoftwareApplication",
+      "name": review.name,
+      "applicationCategory": "WebApplication",
+    },
+    "reviewRating": {
+      "@type": "Rating",
+      "ratingValue": review.overallScore,
+      "bestRating": 10,
+      "worstRating": 0,
+    },
+    "datePublished": review.lastUpdated,
+    "dateModified": review.lastUpdated,
+    "publisher": {
+      "@type": "Organization",
+      "name": "MySite",
+      "url": Astro.site?.toString(),
+    },
+  })} />
+
+  <!-- Schema.org FAQPage -->
+  {review.faq.length > 0 && (
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": review.faq.map(item => ({
+        "@type": "Question",
+        "name": item.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": item.a,
+        },
+      })),
+    })} />
+  )}
+
+  <!-- Schema.org BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": Astro.site?.toString() },
+      { "@type": "ListItem", "position": 2, "name": "Avis", "item": new URL('/avis', Astro.site).toString() },
+      { "@type": "ListItem", "position": 3, "name": review.name },
+    ],
+  })} />
+</BaseLayout>

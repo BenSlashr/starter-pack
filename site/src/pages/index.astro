@@ -4,7 +4,14 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Navbar from '@/components/Navbar.astro';
 import Footer from '@/components/Footer.astro';
 import NewsletterCTA from '@/components/NewsletterCTA.astro';
+import ToolsShowcase from '@/components/ToolsShowcase.astro';
+import FeaturedGuides from '@/components/FeaturedGuides.astro';
+import BranchExplorer from '@/components/BranchExplorer.astro';
+import { FAQS } from '@/data/faqs';
 import { getCollection } from 'astro:content';
+
+// Homepage FAQ (keyed by 'index' in faqs.ts)
+const faqItems = FAQS['index'] ?? [];
 
 // Get recent blog posts (published only)
 const now = new Date();
@@ -12,16 +19,27 @@ const recentPosts = (await getCollection('blog', ({ data }) =>
   data.pubDate.valueOf() <= now.valueOf()
 )).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 6);
 
-// Get guide hubs
-const guideHubs = (await getCollection('guides', ({ data }) =>
-  data.type === 'hub' && (!data.pubDate || data.pubDate.valueOf() <= now.valueOf())
-)).sort((a, b) => a.data.order - b.data.order);
+// Get all guide pages
+const allGuides = await getCollection('guides', ({ data }) =>
+  !data.pubDate || data.pubDate.valueOf() <= now.valueOf()
+);
+
+// Get guide hubs for BranchExplorer
+const guideHubs = allGuides
+  .filter(g => g.data.type === 'hub')
+  .sort((a, b) => a.data.order - b.data.order);
+
+// Get featured guides (first 4 guides)
+const featuredGuides = allGuides
+  .filter(g => g.data.type === 'guide')
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 4);
 ---
 
 <BaseLayout title="Mon Site | Accueil">
   <Navbar />
 
-  <main class="pt-32 pb-16">
+  <main id="main-content" class="pt-32 pb-16">
     <!-- Hero -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-section">
       <div class="max-w-3xl">
@@ -44,25 +62,14 @@ const guideHubs = (await getCollection('guides', ({ data }) =>
       </div>
     </section>
 
-    <!-- Guide Branches -->
-    {guideHubs.length > 0 && (
-      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-section">
-        <h2 class="font-display font-700 text-h2 mb-8">Nos guides</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {guideHubs.map((hub) => (
-            <a
-              href={`/guides/${hub.id}`}
-              class="p-5 rounded-card border border-border bg-surface-raised/30 hover:border-primary/30 transition-all cursor-pointer group"
-            >
-              <h3 class="font-display font-600 text-body-lg text-text-primary group-hover:text-primary transition-colors mb-2">
-                {hub.data.title}
-              </h3>
-              <p class="text-sm text-text-secondary line-clamp-2">{hub.data.description}</p>
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
+    <!-- Branch Explorer (guide categories) -->
+    <BranchExplorer hubs={guideHubs} allPages={allGuides} />
+
+    <!-- Featured Guides -->
+    <FeaturedGuides guides={featuredGuides} />
+
+    <!-- Tools Showcase -->
+    <ToolsShowcase />
 
     <!-- Recent Posts -->
     {recentPosts.length > 0 && (
@@ -97,9 +104,103 @@ const guideHubs = (await getCollection('guides', ({ data }) =>
       </section>
     )}
 
+    <!-- SEO Text -->
+    <section class="py-16 border-t border-border">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="font-display font-800 text-2xl sm:text-3xl tracking-tight mb-6">
+          <!-- TODO: Replace with your site name and value proposition -->
+          Pourquoi <span class="text-gradient-primary">MySite</span> ?
+        </h2>
+        <div class="text-text-secondary leading-relaxed space-y-4">
+          <!-- TODO: Replace with your real SEO text (2-3 paragraphs with internal links) -->
+          <p>
+            MySite est un media educatif independant qui propose des guides pratiques, des outils gratuits et des comparatifs detailles pour vous aider a faire les bons choix.
+          </p>
+          <p>
+            Le site couvre l'integralite du sujet : des <a href="/guides" class="text-primary hover:underline">guides pour debutants</a> aux sujets avances. Nos <a href="/outils" class="text-primary hover:underline">outils interactifs</a> completent les guides avec des calculateurs et simulateurs concrets.
+          </p>
+          <p>
+            Pas de publicite, pas d'inscription obligatoire. Du contenu de qualite et des outils utiles pour prendre des decisions eclairees.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    {faqItems.length > 0 && (
+      <section class="py-16 border-t border-border">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="font-display font-800 text-2xl sm:text-3xl tracking-tight mb-6">
+            Questions <span class="text-gradient-primary">frequentes</span>
+          </h2>
+          <div class="space-y-4">
+            {faqItems.map(item => (
+              <details class="group rounded-xl border border-border bg-surface-raised/30 overflow-hidden">
+                <summary class="flex items-center justify-between p-5 cursor-pointer font-display font-600 text-body text-text-primary group-hover:text-primary transition-colors">
+                  {item.question}
+                  <svg class="w-5 h-5 text-text-muted flex-shrink-0 ml-4 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div class="px-5 pb-5 text-sm text-text-secondary leading-relaxed border-t border-border-subtle pt-4">
+                  {item.answer}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
     <!-- Newsletter -->
     <NewsletterCTA />
   </main>
 
   <Footer />
+
+  <!-- Schema.org Organization -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    // TODO: Replace with your site info
+    "name": "MySite",
+    "url": Astro.site?.toString(),
+    "logo": new URL('/logo-icon.svg', Astro.site).toString(),
+    "description": "Description de votre site pour Schema.org.",
+    "sameAs": [],
+  })} />
+
+  <!-- Schema.org WebSite -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    // TODO: Replace with your site name
+    "name": "MySite",
+    "url": Astro.site?.toString(),
+  })} />
+
+  <!-- Schema.org BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil" },
+    ],
+  })} />
+
+  <!-- Schema.org FAQPage (if FAQ items exist) -->
+  {faqItems.length > 0 && (
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqItems.map(item => ({
+        "@type": "Question",
+        "name": item.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": item.answer,
+        },
+      })),
+    })} />
+  )}
 </BaseLayout>

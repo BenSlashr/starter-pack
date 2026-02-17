@@ -1,0 +1,166 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+import FAQSection from '@/components/FAQSection.astro';
+import { ITEMS, generateAllPairs, POPULAR_PAIRS } from '@/data/comparisons';
+import { FAQS } from '@/data/faqs';
+
+const allPairs = generateAllPairs();
+const popularPairs = allPairs.filter(p => POPULAR_PAIRS.includes(p.slug));
+
+// Group pairs by first item for directory listing
+const itemSlugs = Object.keys(ITEMS);
+const groupedPairs: Record<string, typeof allPairs> = {};
+for (const slug of itemSlugs) {
+  groupedPairs[slug] = allPairs.filter(p => p.itemA === slug || p.itemB === slug);
+}
+
+const faqItems = FAQS['comparer'] ?? [];
+---
+
+<BaseLayout
+  title="Comparatifs : quel produit choisir ? | MySite"
+  description="Comparez les produits et services cote a cote. Fonctionnalites, tarifs, avantages et inconvenients pour faire le meilleur choix."
+>
+  <Navbar />
+
+  <main id="main-content" class="pt-32 pb-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
+        <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
+        <span>/</span>
+        <span class="text-text-secondary">Comparer</span>
+      </nav>
+
+      <!-- Hero -->
+      <header class="mb-12">
+        <h1 class="font-display font-800 text-display leading-[1.1] mb-4 tracking-tight">
+          <!-- TODO: Replace with your domain -->
+          Comparer les<br />
+          <span class="text-gradient-primary">produits et services</span>
+        </h1>
+        <p class="text-body-lg text-text-secondary max-w-xl">
+          Comparatifs detailles pour vous aider a faire le bon choix. Specifications, tarifs et verdict pour chaque paire.
+        </p>
+      </header>
+
+      <!-- Popular Comparisons -->
+      {popularPairs.length > 0 && (
+        <section class="mb-12">
+          <h2 class="font-display font-700 text-h2 mb-6">Comparaisons populaires</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {popularPairs.map((pair) => (
+              <a
+                href={`/comparer/${pair.slug}`}
+                class="flex items-center justify-between p-4 rounded-card border border-border hover:border-primary/30 transition-all cursor-pointer group"
+              >
+                <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-surface-raised border border-border flex items-center justify-center">
+                      {pair.specA.image ? (
+                        <img src={pair.specA.image} alt={pair.specA.name} class="w-5 h-5 object-contain" loading="lazy" />
+                      ) : (
+                        <span class="text-xs font-bold text-text-muted">{pair.specA.name[0]}</span>
+                      )}
+                    </div>
+                    <span class="text-sm font-medium text-text-primary">{pair.specA.name}</span>
+                  </div>
+                  <span class="text-xs text-text-muted font-mono">vs</span>
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-surface-raised border border-border flex items-center justify-center">
+                      {pair.specB.image ? (
+                        <img src={pair.specB.image} alt={pair.specB.name} class="w-5 h-5 object-contain" loading="lazy" />
+                      ) : (
+                        <span class="text-xs font-bold text-text-muted">{pair.specB.name[0]}</span>
+                      )}
+                    </div>
+                    <span class="text-sm font-medium text-text-primary">{pair.specB.name}</span>
+                  </div>
+                </div>
+                <svg class="w-4 h-4 text-text-muted group-hover:text-primary transition-colors flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- All Comparisons by Item -->
+      <section class="mb-12">
+        <h2 class="font-display font-700 text-h2 mb-6">Toutes les comparaisons</h2>
+        <div class="space-y-8">
+          {itemSlugs.map((itemSlug) => {
+            const item = ITEMS[itemSlug];
+            const pairs = groupedPairs[itemSlug];
+            if (!pairs || pairs.length === 0) return null;
+
+            return (
+              <div>
+                <h3 class="font-display font-600 text-body-lg text-text-primary mb-3 flex items-center gap-2">
+                  {item.image && (
+                    <img src={item.image} alt={item.name} class="w-5 h-5 object-contain" loading="lazy" />
+                  )}
+                  {item.name}
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {pairs.map((pair) => {
+                    const otherItem = pair.itemA === itemSlug ? pair.specB : pair.specA;
+                    return (
+                      <a
+                        href={`/comparer/${pair.slug}`}
+                        class="px-3 py-2 rounded-lg border border-border text-sm text-text-secondary hover:border-primary/50 hover:text-primary transition-all cursor-pointer"
+                      >
+                        vs {otherItem.name}
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <!-- Cross-links -->
+      <section class="mb-12">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <a href="/avis" class="p-4 rounded-card border border-border hover:border-primary/30 transition-all cursor-pointer group">
+            <p class="text-sm font-medium text-text-primary group-hover:text-primary transition-colors">Avis detailles</p>
+            <p class="text-xs text-text-muted">Tests complets de chaque produit</p>
+          </a>
+          <a href="/guides" class="p-4 rounded-card border border-border hover:border-primary/30 transition-all cursor-pointer group">
+            <p class="text-sm font-medium text-text-primary group-hover:text-primary transition-colors">Guides</p>
+            <p class="text-xs text-text-muted">Tutoriels et conseils</p>
+          </a>
+          <a href="/outils" class="p-4 rounded-card border border-border hover:border-primary/30 transition-all cursor-pointer group">
+            <p class="text-sm font-medium text-text-primary group-hover:text-primary transition-colors">Outils</p>
+            <p class="text-xs text-text-muted">Outils interactifs</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      {faqItems.length > 0 && (
+        <div class="mb-12">
+          <FAQSection items={faqItems} />
+        </div>
+      )}
+    </div>
+  </main>
+
+  <Footer />
+
+  <!-- Schema.org BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": Astro.site?.toString() },
+      { "@type": "ListItem", "position": 2, "name": "Comparer" },
+    ],
+  })} />
+</BaseLayout>

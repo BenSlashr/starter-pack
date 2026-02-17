@@ -1,0 +1,71 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  hubs: CollectionEntry<'guides'>[];
+  allPages: CollectionEntry<'guides'>[];
+}
+
+const { hubs, allPages } = Astro.props;
+
+function entryIdToSlug(id: string): string {
+  if (id === 'index') return '';
+  if (id.endsWith('/index')) return id.slice(0, -'/index'.length);
+  return id;
+}
+
+// TODO: Add icons and descriptions for your guide branches
+const branchMeta: Record<string, { icon: string; blurb: string }> = {
+  'getting-started': {
+    icon: '\u{1F4D6}',
+    blurb: 'Les bases pour bien demarrer.',
+  },
+  // Add more branches as you create them:
+  // 'advanced': { icon: '\u{1F680}', blurb: 'Concepts avances et techniques.' },
+  // 'tools': { icon: '\u{1F6E0}', blurb: 'Guides pratiques sur les outils.' },
+};
+
+const defaultMeta = { icon: '\u{1F4CB}', blurb: 'Guides et articles pratiques.' };
+
+const branchData = hubs.map((hub) => {
+  const slug = entryIdToSlug(hub.id);
+  const meta = branchMeta[slug] ?? defaultMeta;
+  const guideCount = allPages.filter(
+    (p) => p.data.type === 'guide' && p.data.parent === slug
+  ).length;
+  return { slug, title: hub.data.title, meta, guideCount };
+});
+---
+
+{branchData.length > 0 && (
+  <section class="py-16 border-t border-border">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-10">
+        <h2 class="font-display font-800 text-2xl sm:text-3xl tracking-tight mb-3">
+          Explorer par <span class="text-gradient-primary">theme</span>
+        </h2>
+        <p class="text-text-secondary max-w-xl">
+          {branchData.length} theme{branchData.length > 1 ? 's' : ''} couvrant tous les aspects du sujet.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        {branchData.map(({ slug, title, meta, guideCount }) => (
+          <a
+            href={`/guides/${slug}`}
+            class="group p-4 rounded-xl border border-border hover:border-primary/30 bg-surface-raised/20 hover:bg-surface-hover/30 transition-all cursor-pointer"
+          >
+            <div class="text-2xl mb-2">{meta.icon}</div>
+            <h3 class="font-display font-700 text-sm mb-1 group-hover:text-primary transition-colors">
+              {title}
+            </h3>
+            <p class="text-xs text-text-muted leading-relaxed mb-2">{meta.blurb}</p>
+            <span class="text-xs text-text-muted">
+              {guideCount > 0 ? `${guideCount} guide${guideCount > 1 ? 's' : ''}` : 'Bientot'}
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}

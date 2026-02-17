@@ -1,0 +1,32 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const filtered = headings.filter(h => h.depth === 2 || h.depth === 3);
+---
+
+{filtered.length >= 3 && (
+  <nav class="hidden lg:block sticky top-32 self-start" aria-label="Sommaire">
+    <p class="text-xs uppercase tracking-wider text-text-muted mb-3">Sommaire</p>
+    <ul class="space-y-1.5 text-sm border-l border-border pl-3">
+      {filtered.map((h) => (
+        <li class={h.depth === 3 ? 'ml-3' : ''}>
+          <a
+            href={`#${h.slug}`}
+            class="text-text-secondary hover:text-primary transition-colors duration-200 leading-snug block py-0.5"
+          >
+            {h.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}

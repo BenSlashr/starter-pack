@@ -4,9 +4,15 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Navbar from '@/components/Navbar.astro';
 import Footer from '@/components/Footer.astro';
 import CrossLinks from '@/components/CrossLinks.astro';
+import ReadingProgressBar from '@/components/ReadingProgressBar.astro';
+import SocialShare from '@/components/SocialShare.astro';
+import TableOfContents from '@/components/TableOfContents.astro';
+import FAQSection from '@/components/FAQSection.astro';
+import AuthorBio from '@/components/AuthorBio.astro';
 import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
-import type { LinkGroup } from '@/components/CrossLinks.astro';
+import { FAQS } from '@/data/faqs';
+import { getLinksForGuide } from '@/data/internal-links';
 
 export async function getStaticPaths() {
   const now = new Date();
@@ -49,25 +55,28 @@ const parentHub = entry.data.parent
   ? allPages.find((p) => p.id === `${entry.data.parent}/index` || p.id === entry.data.parent)
   : null;
 
-const crossLinkGroups: LinkGroup[] = [
-  {
-    title: 'Glossaire',
-    links: [
-      { href: '/glossaire', label: 'Tous les termes' },
-    ],
-  },
-];
+const faqItems = FAQS[entry.id] ?? [];
+const showToc = !isHub && headings.filter(h => h.depth === 2 || h.depth === 3).length >= 3;
+
+const crossLinkGroups = getLinksForGuide(entry.data.branch);
 ---
 
 <BaseLayout
   title={`${entry.data.title} | MySite`}
   description={entry.data.description}
   ogImage={entry.data.image}
+  ogImageAlt={entry.data.title}
+  ogType={entry.data.type === 'guide' ? 'article' : 'website'}
+  articleMeta={entry.data.type === 'guide' && entry.data.pubDate ? {
+    publishedTime: new Date(entry.data.pubDate).toISOString(),
+    modifiedTime: new Date(entry.data.pubDate).toISOString(),
+  } : undefined}
 >
+  {entry.data.type === 'guide' && <ReadingProgressBar />}
   <Navbar />
 
-  <main class="pt-32 pb-16">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+  <main id="main-content" class="pt-32 pb-16">
+    <div class={`mx-auto px-4 sm:px-6 lg:px-8 ${showToc ? 'max-w-4xl' : 'max-w-3xl'}`}>
       <!-- Breadcrumb -->
       <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
         <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
@@ -99,15 +108,22 @@ const crossLinkGroups: LinkGroup[] = [
           {entry.data.title}
         </h1>
 
-        <p class="text-body-lg text-text-secondary leading-relaxed">
+        <p class="text-body-lg text-text-secondary leading-relaxed mb-6">
           {entry.data.description}
         </p>
+
+        {!isHub && (
+          <div class="flex items-center justify-between gap-4 text-sm text-text-muted border-t border-border pt-4">
+            <span>{entry.data.readingTime} de lecture</span>
+            <SocialShare title={entry.data.title} url={`/guides/${entry.id}`} />
+          </div>
+        )}
       </header>
 
       <!-- Hero Image -->
       {entry.data.image && (
         <div class="mb-10 rounded-card overflow-hidden border border-border">
-          <img src={entry.data.image} alt={entry.data.title} class="w-full h-auto object-cover aspect-video" loading="eager" />
+          <img src={entry.data.image} alt={entry.data.title} width="1200" height="675" class="w-full h-auto object-cover aspect-video" loading="eager" fetchpriority="high" />
         </div>
       )}
 
@@ -134,10 +150,18 @@ const crossLinkGroups: LinkGroup[] = [
         </div>
       )}
 
-      <!-- Content -->
-      <article class="prose-custom">
-        <Content />
-      </article>
+      <!-- Content + TOC grid -->
+      <div class={showToc ? 'lg:grid lg:grid-cols-[1fr_220px] lg:gap-8' : ''}>
+        <article class="prose-custom">
+          <Content />
+        </article>
+
+        {showToc && (
+          <aside>
+            <TableOfContents headings={headings} />
+          </aside>
+        )}
+      </div>
 
       <!-- Sibling navigation -->
       {!isHub && siblings.length > 1 && (
@@ -170,21 +194,71 @@ const crossLinkGroups: LinkGroup[] = [
       <section class="mt-12">
         <CrossLinks groups={crossLinkGroups} />
       </section>
+
+      <!-- FAQ -->
+      {faqItems.length > 0 && (
+        <div class="mt-12">
+          <FAQSection items={faqItems} />
+        </div>
+      )}
+
+      <!-- Author Bio (guides only) -->
+      {!isHub && <AuthorBio />}
+
+      <!-- Disclaimer -->
+      {!isHub && (
+        <div class="mt-8 p-4 rounded-card border border-border bg-surface-raised/20">
+          <p class="text-xs text-text-muted leading-relaxed">
+            {/* TODO: Replace with your disclaimer */}
+            Cet article est publie a titre informatif. Faites vos propres recherches avant toute decision.
+          </p>
+        </div>
+      )}
     </div>
   </main>
 
   <Footer />
 
-  <!-- Schema.org -->
+  <!-- Schema.org BreadcrumbList -->
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": entry.data.title,
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": Astro.site?.toString() },
+      { "@type": "ListItem", "position": 2, "name": "Guides", "item": new URL('/guides', Astro.site).toString() },
+      ...(parentHub ? [{ "@type": "ListItem", "position": 3, "name": parentHub.data.title, "item": new URL(`/guides/${parentHub.id.replace(/\/index$/, '')}`, Astro.site).toString() }] : []),
+      ...(!isHub ? [{ "@type": "ListItem", "position": parentHub ? 4 : 3, "name": entry.data.title }] : []),
+    ],
+  })} />
+
+  <!-- Schema.org Article -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": isHub ? "CollectionPage" : "Article",
+    ...(isHub ? { "name": entry.data.title } : { "headline": entry.data.title }),
     "description": entry.data.description,
+    ...(entry.data.pubDate && { "datePublished": new Date(entry.data.pubDate).toISOString() }),
+    ...(entry.data.pubDate && { "dateModified": new Date(entry.data.pubDate).toISOString() }),
+    ...(entry.data.image && {
+      "image": {
+        "@type": "ImageObject",
+        "url": new URL(entry.data.image, Astro.site).toString(),
+        "width": 1200,
+        "height": 675,
+      },
+    }),
     "publisher": {
       "@type": "Organization",
       "name": "MySite",
       "url": Astro.site?.toString(),
+      "logo": {
+        "@type": "ImageObject",
+        "url": new URL('/logo-icon.svg', Astro.site).toString(),
+      },
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": new URL(`/guides/${entry.id}`, Astro.site).toString(),
     },
   })} />
 </BaseLayout>

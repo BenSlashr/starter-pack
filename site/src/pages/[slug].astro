@@ -4,8 +4,17 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Navbar from '@/components/Navbar.astro';
 import Footer from '@/components/Footer.astro';
 import CrossLinks from '@/components/CrossLinks.astro';
+import SocialShare from '@/components/SocialShare.astro';
+import ReadingProgressBar from '@/components/ReadingProgressBar.astro';
+import TableOfContents from '@/components/TableOfContents.astro';
+import FAQSection from '@/components/FAQSection.astro';
+import AuthorBio from '@/components/AuthorBio.astro';
+import QuizCTA from '@/components/QuizCTA.astro';
+import QuizEngine from '@/components/tools/QuizEngine.tsx';
 import { getCollection, render } from 'astro:content';
-import type { LinkGroup } from '@/components/CrossLinks.astro';
+import { FAQS } from '@/data/faqs';
+import { getLinksForBlog } from '@/data/internal-links';
+import quizzes from '@/data/quizzes.json';
 
 export async function getStaticPaths() {
   const now = new Date();
@@ -19,24 +28,13 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 
-// TODO: Customize cross-links for your content silos
-const crossLinkGroups: LinkGroup[] = [
-  {
-    title: 'Guides',
-    links: [
-      { href: '/guides/getting-started', label: 'Bien demarrer' },
-    ],
-  },
-  {
-    title: 'Glossaire',
-    links: [
-      { href: '/glossaire/seo', label: 'SEO' },
-      { href: '/glossaire', label: 'Tous les termes' },
-    ],
-  },
-];
+const quizData = (quizzes as Record<string, any>)[post.id] ?? null;
+const faqItems = FAQS[post.id] ?? [];
+const showToc = headings.filter(h => h.depth === 2 || h.depth === 3).length >= 3;
+
+const crossLinkGroups = getLinksForBlog();
 
 const formattedDate = new Date(post.data.pubDate).toLocaleDateString('fr-FR', {
   year: 'numeric',
@@ -49,11 +47,19 @@ const formattedDate = new Date(post.data.pubDate).toLocaleDateString('fr-FR', {
   title={`${post.data.title} | MySite`}
   description={post.data.description}
   ogImage={post.data.image}
+  ogImageAlt={post.data.title}
+  ogType="article"
+  articleMeta={{
+    publishedTime: post.data.pubDate.toISOString(),
+    modifiedTime: post.data.pubDate.toISOString(),
+    author: post.data.author,
+  }}
 >
+  <ReadingProgressBar />
   <Navbar />
 
-  <main class="pt-32 pb-16">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+  <main id="main-content" class="pt-32 pb-16">
+    <div class={`mx-auto px-4 sm:px-6 lg:px-8 ${showToc ? 'max-w-4xl' : 'max-w-3xl'}`}>
       <!-- Breadcrumb -->
       <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
         <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
@@ -80,10 +86,13 @@ const formattedDate = new Date(post.data.pubDate).toLocaleDateString('fr-FR', {
           {post.data.description}
         </p>
 
-        <div class="flex items-center gap-4 text-sm text-text-muted border-t border-border pt-4">
-          <span>Par <strong class="text-text-secondary">{post.data.author}</strong></span>
-          <span>&middot;</span>
-          <time datetime={post.data.pubDate.toISOString()}>{formattedDate}</time>
+        <div class="flex items-center justify-between gap-4 text-sm text-text-muted border-t border-border pt-4">
+          <div class="flex items-center gap-4">
+            <span>Par <strong class="text-text-secondary">{post.data.author}</strong></span>
+            <span>&middot;</span>
+            <time datetime={post.data.pubDate.toISOString()}>{formattedDate}</time>
+          </div>
+          <SocialShare title={post.data.title} url={`/${post.id}`} />
         </div>
       </header>
 
@@ -93,21 +102,60 @@ const formattedDate = new Date(post.data.pubDate).toLocaleDateString('fr-FR', {
           <img
             src={post.data.image}
             alt={post.data.title}
+            width="1200"
+            height="675"
             class="w-full h-auto object-cover aspect-video"
             loading="eager"
+            fetchpriority="high"
           />
         </div>
       )}
 
-      <!-- Content -->
-      <article class="prose-custom">
-        <Content />
-      </article>
+      <!-- Quiz CTA -->
+      {quizData && (
+        <QuizCTA questionCount={quizData.questions.length} />
+      )}
+
+      <!-- Content + TOC grid -->
+      <div class={showToc ? 'lg:grid lg:grid-cols-[1fr_220px] lg:gap-8' : ''}>
+        <div>
+          <article class="prose-custom">
+            <Content />
+          </article>
+
+          <!-- Quiz -->
+          {quizData && (
+            <section id="quiz-section" class="scroll-mt-24 mt-12">
+              <QuizEngine
+                client:visible
+                title={quizData.title}
+                questions={quizData.questions}
+              />
+            </section>
+          )}
+        </div>
+
+        {showToc && (
+          <aside>
+            <TableOfContents headings={headings} />
+          </aside>
+        )}
+      </div>
 
       <!-- Cross-links -->
       <section class="mt-12">
         <CrossLinks groups={crossLinkGroups} />
       </section>
+
+      <!-- FAQ -->
+      {faqItems.length > 0 && (
+        <div class="mt-12">
+          <FAQSection items={faqItems} />
+        </div>
+      )}
+
+      <!-- Author Bio -->
+      <AuthorBio />
 
       <!-- Disclaimer -->
       <div class="mt-8 p-4 rounded-card border border-border bg-surface-raised/20">
@@ -121,12 +169,32 @@ const formattedDate = new Date(post.data.pubDate).toLocaleDateString('fr-FR', {
 
   <Footer />
 
+  <!-- Schema.org BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": Astro.site?.toString() },
+      { "@type": "ListItem", "position": 2, "name": post.data.title },
+    ],
+  })} />
+
   <!-- Schema.org Article -->
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": post.data.title,
     "description": post.data.description,
+    "datePublished": post.data.pubDate.toISOString(),
+    "dateModified": post.data.pubDate.toISOString(),
+    ...(post.data.image && {
+      "image": {
+        "@type": "ImageObject",
+        "url": new URL(post.data.image, Astro.site).toString(),
+        "width": 1200,
+        "height": 675,
+      },
+    }),
     "author": {
       "@type": "Person",
       "name": post.data.author,
@@ -135,8 +203,11 @@ const formattedDate = new Date(post.data.pubDate).toLocaleDateString('fr-FR', {
       "@type": "Organization",
       "name": "MySite",
       "url": Astro.site?.toString(),
+      "logo": {
+        "@type": "ImageObject",
+        "url": new URL('/logo-icon.svg', Astro.site).toString(),
+      },
     },
-    "datePublished": post.data.pubDate.toISOString(),
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": new URL(`/${post.id}/`, Astro.site).toString(),

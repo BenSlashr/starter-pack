@@ -1,0 +1,91 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+
+// TODO: Replace contact@your-domain.com with your email
+---
+
+<BaseLayout
+  title="Contact - MySite"
+  description="Contactez-nous. Questions, suggestions, signalements d'erreurs ou propositions de partenariat."
+>
+  <Navbar />
+
+  <main id="main-content" class="pt-32 pb-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
+        <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
+        <span>/</span>
+        <span class="text-text-secondary">Contact</span>
+      </nav>
+
+      <h1 class="font-display font-800 text-display leading-[1.1] mb-6 tracking-tight">
+        Nous <span class="text-gradient-primary">contacter</span>
+      </h1>
+
+      <div class="space-y-8 text-text-secondary text-body leading-relaxed">
+        <p>
+          Une question sur un article ? Une erreur a signaler ? Une idee de contenu ou d'outil ? On lit tout et on repond.
+        </p>
+
+        <!-- Email -->
+        <div class="p-6 rounded-card bg-surface border border-border">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-card bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="font-display font-700 text-h3 text-text-primary mb-1">Par email</h2>
+              <a href="mailto:contact@your-domain.com" class="text-primary hover:underline text-sm">contact@your-domain.com</a>
+              <p class="text-xs text-text-muted mt-1">Reponse sous 48h en moyenne.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sujets courants -->
+        <h2 class="font-display font-700 text-h2 text-text-primary">Sujets courants</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* TODO: Customize these common topics */}
+          <div class="p-4 rounded-card bg-surface/50 border border-border">
+            <h3 class="font-display font-600 text-sm text-text-primary mb-1">Erreur dans un article</h3>
+            <p class="text-xs text-text-secondary">Indiquez l'URL de la page et la correction a apporter. On met a jour rapidement.</p>
+          </div>
+          <div class="p-4 rounded-card bg-surface/50 border border-border">
+            <h3 class="font-display font-600 text-sm text-text-primary mb-1">Suggestion de contenu</h3>
+            <p class="text-xs text-text-secondary">Un sujet qui manque ? Un outil qui vous serait utile ? On prend note.</p>
+          </div>
+          <div class="p-4 rounded-card bg-surface/50 border border-border">
+            <h3 class="font-display font-600 text-sm text-text-primary mb-1">Partenariat</h3>
+            <p class="text-xs text-text-secondary">Ecrivez-nous avec les details de votre proposition.</p>
+          </div>
+          <div class="p-4 rounded-card bg-surface/50 border border-border">
+            <h3 class="font-display font-600 text-sm text-text-primary mb-1">Autre</h3>
+            <p class="text-xs text-text-secondary">Pour tout le reste, ecrivez-nous. On repond a tout.</p>
+          </div>
+        </div>
+
+        <p class="text-sm text-text-muted">
+          Merci de ne pas envoyer de sollicitations commerciales non liees a notre activite.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+
+  <!-- Schema.org BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": Astro.site?.toString() },
+      { "@type": "ListItem", "position": 2, "name": "Contact" },
+    ],
+  })} />
+</BaseLayout>

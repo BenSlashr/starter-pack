@@ -1,0 +1,120 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+
+// TODO: Replace MySite, your-domain.com, contact@your-domain.com with your info
+---
+
+<BaseLayout
+  title="Conditions generales d'utilisation - MySite"
+  description="Conditions generales d'utilisation du site. Regles d'utilisation, responsabilites et propriete intellectuelle."
+>
+  <Navbar />
+
+  <main id="main-content" class="pt-32 pb-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
+        <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
+        <span>/</span>
+        <span class="text-text-secondary">CGU</span>
+      </nav>
+
+      <h1 class="font-display font-800 text-display leading-[1.1] mb-6 tracking-tight">
+        Conditions generales <span class="text-gradient-primary">d'utilisation</span>
+      </h1>
+
+      <p class="text-xs text-text-muted mb-8">Derniere mise a jour : fevrier 2026</p>
+
+      <div class="space-y-8 text-text-secondary text-body leading-relaxed">
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">1. Objet</h2>
+          <p>
+            Les presentes conditions generales d'utilisation (CGU) regissent l'acces et l'utilisation du site <strong class="text-text-primary">your-domain.com</strong> (ci-apres "le Site"), edite par MySite.
+          </p>
+          <p class="mt-2">
+            En accedant au Site, vous acceptez ces conditions dans leur integralite. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser le Site.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">2. Nature du contenu</h2>
+          <p>
+            Le Site publie des contenus a caractere informatif et educatif.
+          </p>
+          <div class="p-4 rounded-card bg-primary/5 border border-primary/20 mt-3">
+            <p class="text-sm text-text-primary">
+              <strong>Les informations publiees ne constituent en aucun cas des conseils professionnels.</strong> Toute decision prise sur la base de ces informations est sous votre entiere responsabilite.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">3. Propriete intellectuelle</h2>
+          <p>
+            L'ensemble des contenus du Site (textes, images, outils, code, design) est protege par le droit d'auteur. Toute reproduction, meme partielle, sans autorisation ecrite prealable est interdite.
+          </p>
+          <p class="mt-2">
+            La citation d'extraits courts est autorisee a condition de mentionner la source et d'inclure un lien vers l'article original.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">4. Liens affilies</h2>
+          <p>
+            Le Site peut contenir des liens affilies vers des services tiers. Ces liens sont signales et n'influencent pas le contenu editorial.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">5. Liens externes</h2>
+          <p>
+            Le Site peut contenir des liens vers des sites tiers. MySite n'exerce aucun controle sur ces sites et decline toute responsabilite quant a leur contenu, leurs pratiques ou leur disponibilite.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">6. Limitation de responsabilite</h2>
+          <p>
+            MySite s'efforce de publier des informations exactes et a jour, mais ne garantit pas l'absence d'erreurs. Le Site est fourni "en l'etat". MySite ne saurait etre tenu responsable des pertes resultant de l'utilisation des informations publiees.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">7. Disponibilite</h2>
+          <p>
+            MySite fait son possible pour maintenir le Site accessible en permanence, mais ne garantit pas une disponibilite ininterrompue. Des interruptions pour maintenance ou raisons techniques peuvent survenir sans preavis.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">8. Modification des CGU</h2>
+          <p>
+            MySite se reserve le droit de modifier ces CGU a tout moment. Les modifications prennent effet des leur publication sur cette page.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">9. Contact</h2>
+          <p>
+            Pour toute question relative a ces CGU, contactez-nous a <a href="mailto:contact@your-domain.com" class="text-primary hover:underline">contact@your-domain.com</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+
+  <!-- Schema.org BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": Astro.site?.toString() },
+      { "@type": "ListItem", "position": 2, "name": "CGU" },
+    ],
+  })} />
+</BaseLayout>

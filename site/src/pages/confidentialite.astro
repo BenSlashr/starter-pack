@@ -1,0 +1,134 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+
+// TODO: Replace MySite, your-domain.com, contact@your-domain.com, hosting provider with your info
+---
+
+<BaseLayout
+  title="Politique de confidentialite - MySite"
+  description="Politique de confidentialite de MySite. Comment nous collectons, utilisons et protegeons vos donnees personnelles."
+>
+  <Navbar />
+
+  <main id="main-content" class="pt-32 pb-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
+        <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
+        <span>/</span>
+        <span class="text-text-secondary">Confidentialite</span>
+      </nav>
+
+      <h1 class="font-display font-800 text-display leading-[1.1] mb-6 tracking-tight">
+        Politique de <span class="text-gradient-primary">confidentialite</span>
+      </h1>
+
+      <p class="text-xs text-text-muted mb-8">Derniere mise a jour : fevrier 2026</p>
+
+      <div class="space-y-8 text-text-secondary text-body leading-relaxed">
+        <p>
+          MySite respecte votre vie privee. Cette page explique quelles donnees on collecte, pourquoi, et ce qu'on en fait. Version courte : le strict minimum, et on ne revend rien.
+        </p>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">1. Donnees collectees</h2>
+
+          <h3 class="font-display font-600 text-h3 text-text-primary mt-4 mb-2">Newsletter</h3>
+          <p>
+            Si vous vous inscrivez a la newsletter, on collecte votre adresse email. Elle est stockee chez <strong class="text-text-primary">Mailchimp</strong> (The Rocket Science Group LLC, conforme au RGPD via les clauses contractuelles types).
+          </p>
+          <p class="mt-2">
+            On utilise votre email uniquement pour vous envoyer la newsletter. Pas de revente, pas de partage avec des tiers.
+          </p>
+
+          <h3 class="font-display font-600 text-h3 text-text-primary mt-4 mb-2">Navigation</h3>
+          <p>
+            Le Site est un site statique. On ne place pas de cookies de tracking. On n'utilise pas Google Analytics ni aucun outil de suivi comportemental tiers.
+          </p>
+
+          <h3 class="font-display font-600 text-h3 text-text-primary mt-4 mb-2">Logs serveur</h3>
+          <p>
+            Le serveur peut enregistrer des logs techniques (adresse IP, user-agent, pages visitees). Ces logs sont utilises uniquement pour la maintenance technique et la securite. Ils sont supprimes automatiquement apres 30 jours.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">2. Liens affilies et tiers</h2>
+          <p>
+            Le Site peut contenir des liens affilies vers des services tiers. Lorsque vous cliquez sur ces liens, le site tiers peut placer ses propres cookies selon sa propre politique de confidentialite. MySite n'a aucun controle sur ces pratiques.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">3. Vos droits (RGPD)</h2>
+          <p>
+            Conformement au Reglement General sur la Protection des Donnees (RGPD), vous disposez des droits suivants :
+          </p>
+          <ul class="mt-3 space-y-2">
+            {[
+              { right: 'Acces', desc: 'savoir quelles donnees on detient sur vous.' },
+              { right: 'Rectification', desc: 'corriger vos donnees si elles sont inexactes.' },
+              { right: 'Suppression', desc: 'demander la suppression de vos donnees.' },
+              { right: 'Portabilite', desc: 'recuperer vos donnees dans un format lisible.' },
+              { right: 'Opposition', desc: 'vous opposer au traitement de vos donnees.' },
+            ].map((item) => (
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-primary flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+                </svg>
+                <span><strong class="text-text-primary">{item.right}</strong> : {item.desc}</span>
+              </li>
+            ))}
+          </ul>
+          <p class="mt-3">
+            Pour exercer ces droits, ecrivez a <a href="mailto:contact@your-domain.com" class="text-primary hover:underline">contact@your-domain.com</a>. On traite toute demande sous 30 jours.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">4. Desabonnement newsletter</h2>
+          <p>
+            Chaque email contient un lien de desabonnement en bas de page. Un clic suffit. Votre email sera supprime de la liste sous 48h.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">5. Hebergement</h2>
+          <p>
+            <!-- TODO: Replace with your hosting provider info -->
+            Le Site est heberge chez <strong class="text-text-primary">Votre hebergeur</strong>. Les donnees sont stockees sur des serveurs situes en France/EU.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">6. Modifications</h2>
+          <p>
+            Cette politique peut etre mise a jour. La date de derniere modification est indiquee en haut de cette page.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display font-700 text-h2 text-text-primary mb-3">7. Contact</h2>
+          <p>
+            Pour toute question sur la protection de vos donnees : <a href="mailto:contact@your-domain.com" class="text-primary hover:underline">contact@your-domain.com</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+
+  <!-- Schema.org BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": Astro.site?.toString() },
+      { "@type": "ListItem", "position": 2, "name": "Confidentialite" },
+    ],
+  })} />
+</BaseLayout>

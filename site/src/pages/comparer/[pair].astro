@@ -1,0 +1,268 @@
+---
+import '@/styles/global.css';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+import CrossLinks from '@/components/CrossLinks.astro';
+import AuthorBio from '@/components/AuthorBio.astro';
+import { generateAllPairs, generateComparisonPage, ITEMS, type ComparisonPage } from '@/data/comparisons';
+
+export function getStaticPaths() {
+  return generateAllPairs().map((pair) => ({
+    params: { pair: pair.slug },
+    props: { page: generateComparisonPage(pair) },
+  }));
+}
+
+interface Props {
+  page: ComparisonPage;
+}
+
+const { page } = Astro.props;
+const year = new Date().getFullYear();
+const month = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
+// Related comparisons (other pairs involving either item)
+const allPairs = generateAllPairs();
+const relatedPairs = allPairs
+  .filter(p => p.slug !== page.slug && (
+    p.itemA === page.specA.slug || p.itemA === page.specB.slug ||
+    p.itemB === page.specA.slug || p.itemB === page.specB.slug
+  ))
+  .slice(0, 6);
+---
+
+<BaseLayout title={page.metaTitle} description={page.metaDescription}>
+  <Navbar />
+
+  <main id="main-content" class="pt-32 pb-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-8" aria-label="Fil d'ariane">
+        <a href="/" class="hover:text-primary transition-colors cursor-pointer">Accueil</a>
+        <span>/</span>
+        <a href="/comparer" class="hover:text-primary transition-colors cursor-pointer">Comparer</a>
+        <span>/</span>
+        <span class="text-text-secondary">{page.specA.name} vs {page.specB.name}</span>
+      </nav>
+
+      <!-- H1 -->
+      <header class="mb-8">
+        <h1 class="font-display font-800 text-display leading-[1.1] mb-4 tracking-tight">
+          <span class="text-gradient-primary">{page.specA.name}</span>
+          <span class="text-text-muted mx-2">vs</span>
+          <span class="text-gradient-primary">{page.specB.name}</span>
+        </h1>
+        <p class="text-body-lg text-text-secondary max-w-xl">
+          Comparatif detaille {page.specA.name}/{page.specB.name} — Specifications, tarifs et verdict pour faire le bon choix.
+        </p>
+        <div class="mt-3">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs border border-border text-text-muted">
+            <span class="w-1.5 h-1.5 rounded-full bg-positive animate-pulse"></span>
+            Mis a jour en {month}
+          </span>
+        </div>
+      </header>
+
+      <!-- Key Takeaways -->
+      <section class="mb-10 p-5 rounded-card border border-primary/20 bg-primary/5">
+        <h2 class="font-display font-700 text-sm text-primary mb-3 uppercase tracking-wider">Points cles</h2>
+        <ul class="space-y-2">
+          {page.keyTakeaways.map((point) => (
+            <li class="flex items-start gap-2 text-sm text-text-secondary leading-relaxed">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+              {point}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <!-- Technical Comparison Table -->
+      <section class="mb-10">
+        <h2 class="font-display font-700 text-h2 mb-6">Tableau comparatif</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border-collapse">
+            <thead>
+              <tr class="border-b border-border">
+                <th class="text-left py-3 px-4 text-text-muted font-medium text-xs uppercase tracking-wider">Critere</th>
+                <th class="text-left py-3 px-4 text-primary font-display font-bold">{page.specA.name}</th>
+                <th class="text-left py-3 px-4 text-secondary font-display font-bold">{page.specB.name}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {page.techComparison.map((row) => (
+                <tr class="border-b border-border/50 hover:bg-surface-hover/30 transition-colors">
+                  <td class="py-3 px-4 text-text-secondary font-medium">{row.label}</td>
+                  <td class="py-3 px-4 font-mono text-text-primary">
+                    {row.itemA}
+                    {row.winner === 'a' && <span class="ml-2 inline-block w-2 h-2 rounded-full bg-primary" title="Avantage"></span>}
+                  </td>
+                  <td class="py-3 px-4 font-mono text-text-primary">
+                    {row.itemB}
+                    {row.winner === 'b' && <span class="ml-2 inline-block w-2 h-2 rounded-full bg-secondary" title="Avantage"></span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-3 text-xs text-text-muted">
+          <span class="inline-block w-2 h-2 rounded-full bg-primary mr-1 align-middle"></span> Avantage {page.specA.name}
+          <span class="inline-block w-2 h-2 rounded-full bg-secondary mr-1 ml-4 align-middle"></span> Avantage {page.specB.name}
+        </p>
+      </section>
+
+      <!-- What is A -->
+      <section class="mb-10">
+        <h2 class="font-display font-700 text-h2 mb-4">
+          C'est quoi {page.specA.name} ?
+        </h2>
+        <p class="text-text-secondary leading-relaxed whitespace-pre-line">{page.whatIsA}</p>
+      </section>
+
+      <!-- What is B -->
+      <section class="mb-10">
+        <h2 class="font-display font-700 text-h2 mb-4">
+          C'est quoi {page.specB.name} ?
+        </h2>
+        <p class="text-text-secondary leading-relaxed whitespace-pre-line">{page.whatIsB}</p>
+      </section>
+
+      <!-- Use Cases -->
+      <section class="mb-10">
+        <h2 class="font-display font-700 text-h2 mb-4">Cas d'usage compares</h2>
+        <p class="text-text-secondary leading-relaxed whitespace-pre-line">{page.useCases}</p>
+      </section>
+
+      <!-- Verdict -->
+      <section class="mb-10">
+        <h2 class="font-display font-700 text-h2 mb-4">
+          Verdict : {page.specA.name} ou {page.specB.name} ?
+        </h2>
+        <p class="text-text-secondary leading-relaxed whitespace-pre-line">{page.verdict}</p>
+      </section>
+
+      <!-- Review links (if reviews exist) -->
+      <section class="mb-10">
+        <h2 class="font-display font-700 text-h2 mb-6">Avis detailles</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <a
+            href={`/avis/${page.specA.slug}`}
+            class="flex flex-col items-center gap-2 p-4 rounded-xl border border-border bg-surface-raised/30 hover:border-primary/50 hover:bg-surface-hover transition-all cursor-pointer group text-center"
+          >
+            <span class="text-xs font-mono font-bold text-primary">{page.specA.name[0]}</span>
+            <span class="text-sm font-medium text-text-primary group-hover:text-primary transition-colors">Avis {page.specA.name}</span>
+          </a>
+          <a
+            href={`/avis/${page.specB.slug}`}
+            class="flex flex-col items-center gap-2 p-4 rounded-xl border border-border bg-surface-raised/30 hover:border-secondary/50 hover:bg-surface-hover transition-all cursor-pointer group text-center"
+          >
+            <span class="text-xs font-mono font-bold text-secondary">{page.specB.name[0]}</span>
+            <span class="text-sm font-medium text-text-primary group-hover:text-secondary transition-colors">Avis {page.specB.name}</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- Related Comparisons -->
+      {relatedPairs.length > 0 && (
+        <section class="mb-10">
+          <h2 class="font-display font-700 text-h2 mb-6">Autres comparaisons</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {relatedPairs.map((rp) => (
+              <a
+                href={`/comparer/${rp.slug}`}
+                class="flex flex-col items-center gap-1 p-4 rounded-xl border border-border bg-surface-raised/30 hover:border-primary/50 hover:bg-surface-hover transition-all cursor-pointer group text-center"
+              >
+                <span class="text-xs font-mono text-text-muted">{rp.specA.name[0]} vs {rp.specB.name[0]}</span>
+                <span class="text-sm font-medium text-text-primary group-hover:text-primary transition-colors">
+                  {rp.specA.name} vs {rp.specB.name}
+                </span>
+              </a>
+            ))}
+          </div>
+          <div class="mt-4">
+            <a href="/comparer" class="text-sm text-primary hover:underline cursor-pointer">
+              Voir toutes les comparaisons &rarr;
+            </a>
+          </div>
+        </section>
+      )}
+
+      <!-- FAQ -->
+      {page.faq.length > 0 && (
+        <section class="mb-10">
+          <h2 class="font-display font-700 text-h2 mb-6">Questions frequentes</h2>
+          <div class="space-y-3">
+            {page.faq.map((item) => (
+              <details class="group rounded-card border border-border bg-surface-raised/30 overflow-hidden">
+                <summary class="flex items-center justify-between p-5 cursor-pointer text-text-primary font-medium hover:text-primary transition-colors">
+                  {item.q}
+                  <svg class="w-5 h-5 text-text-muted group-open:rotate-180 transition-transform flex-shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div class="px-5 pb-5 text-sm text-text-secondary leading-relaxed">
+                  {item.a}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Author Bio -->
+      <AuthorBio />
+
+      <!-- Disclaimer -->
+      <div class="mt-8 p-4 rounded-card border border-border bg-surface-raised/20">
+        <p class="text-xs text-text-muted leading-relaxed">
+          <!-- TODO: Replace with your disclaimer -->
+          Ce comparatif est publie a titre informatif. Faites vos propres recherches avant toute decision.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+
+  <!-- Schema.org FAQPage -->
+  {page.faq.length > 0 && (
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": page.faq.map(item => ({
+        "@type": "Question",
+        "name": item.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": item.a,
+        },
+      })),
+    })} />
+  )}
+
+  <!-- Schema.org BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": Astro.site?.toString() },
+      { "@type": "ListItem", "position": 2, "name": "Comparer", "item": new URL('/comparer', Astro.site).toString() },
+      { "@type": "ListItem", "position": 3, "name": `${page.specA.name} vs ${page.specB.name}` },
+    ],
+  })} />
+
+  <!-- Schema.org Article -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": `${page.specA.name} vs ${page.specB.name} : Comparatif detaille`,
+    "description": page.metaDescription,
+    "dateModified": new Date().toISOString().split('T')[0],
+    "publisher": {
+      "@type": "Organization",
+      "name": "MySite",
+      "url": Astro.site?.toString(),
+    },
+  })} />
+</BaseLayout>
